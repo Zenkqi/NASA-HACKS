@@ -84,15 +84,17 @@ const SolarSystem = () => {
 
 const Scene = () => {
   return (
-    <Canvas camera={{ position: [0, 2.5, 4], fov: 75 }}>
-      <ambientLight />
-      <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
-      <OrbitControls enableDamping dampingFactor={0.03} />
-      <Suspense fallback={null}>
-        <SolarSystem />
-      </Suspense>
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
-    </Canvas>
+    <div style={{ height: '100vh', width: '100vw', backgroundColor: 'black' }}>
+      <Canvas camera={{ position: [0, 2.5, 4], fov: 75 }} style={{ width: '100%', height: '100%' }}>
+        <ambientLight />
+        <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
+        <OrbitControls enableDamping dampingFactor={0.03} />
+        <Suspense fallback={null}>
+          <SolarSystem />
+        </Suspense>
+        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
+      </Canvas>
+    </div>
   );
 };
 

@@ -8,7 +8,7 @@ import Scene from '../../scenes/SolarSystem.jsx';
 
 function Home () {
     return (
-        <>
+        <>  
             <HeroSection/>
             <Scene/>
         </>
