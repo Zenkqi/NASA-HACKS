@@ -94,16 +94,19 @@ const Scene = () => {
       <Canvas camera={{ position: [0, 2.5, 4], fov: 75 }} style={{ width: '100%', height: '100%' }}>
         <ambientLight />
         <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
-        <OrbitControls 
-          enableDamping 
-          dampingFactor={0.1} 
-          rotateSpeed={0.7} 
-          enableZoom={true} 
-          enablePan={true} 
-        />
-        <Suspense fallback={null}>
-          <SolarSystem />
-        </Suspense>
+        <mesh>
+          <OrbitControls 
+            enableDamping 
+            dampingFactor={0.1} 
+            rotateSpeed={0.7} 
+            enableZoom={true} 
+            enablePan={true} 
+          />
+          <Suspense fallback={null}>
+            <SolarSystem />
+          </Suspense>
+        </mesh>
+
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
     </div>
