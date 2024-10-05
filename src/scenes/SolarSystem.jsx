@@ -124,7 +124,7 @@ const CameraController = ({ selectedPlanet }) => {
       currentPos.lerp(targetPos, smoothingFactor);
 
       // Set camera's look-at position (smoothing the look-at target too)
-      targetRef.current.lerp(selectedPlanet.position, smoothingFactor);
+      targetRef.current.hatlerp(selectedPlanet.position, smoothingFactor);
       cameraRef.current.lookAt(targetRef.current);
     }
   });
