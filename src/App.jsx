@@ -5,7 +5,8 @@ import Navbar from './components/Navbar';
 import Home from './components/pages/Home.jsx';
 import SignUp from './components/pages/SignUp.jsx';
 import AboutMe from './components/pages/AboutMe.jsx';
-import Projects from './components/pages/terminal/Projects.jsx';
+import Projects from './components/pages/Projects.jsx';
+import SolarSystemComponent from './components/pages/SolarSystemComponent.jsx';
 
 function App() {
   return (
@@ -18,7 +19,6 @@ function App() {
         <Route path='/AboutMe' exact element={<AboutMe/>}></Route>
         <Route path='/Projects' exact element={<Projects/>}></Route>
         <Route path='/sign-up' exact element={<SignUp/>}></Route>
-
       </Routes>
     </Router>
     </>

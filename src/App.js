@@ -5,7 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './components/pages/Home';
 import SignUp from './components/pages/SignUp.js';
 import AboutMe from './components/pages/AboutMe.js';
-import Projects from './components/pages/terminal/Projects.js';
+import Projects from './components/pages/Projects.jsx';
 
 function App() {
   return (
