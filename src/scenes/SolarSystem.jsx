@@ -10,7 +10,8 @@ import getPlanet from '../solar-system/getPlanet';
 import getAsteroidBelt from '../solar-system/getAsteroidBelt';
 import getElipticLines from '../solar-system/getElipticLines';
 
-const SolarSystem = () => {
+const SolarSystem = ({ onPlanetClick }) => {
+  const [hoveredPlanet, setHoveredPlanet] = useState(null);
   const [objs, setObjs] = useState([]);
   const solarSystemRef = useRef();
 
@@ -67,10 +68,32 @@ const SolarSystem = () => {
     state.camera.lookAt(0, 0, 0);
   });
 
+  // Event handlers for interaction
+  const handlePointerOver = (planet) => {
+    setHoveredPlanet(planet);
+  };
+
+  const handlePointerOut = () => {
+    setHoveredPlanet(null);
+  };
+
+  const handlePlanetClick = (planet) => {
+    if (onPlanetClick) {
+      onPlanetClick(planet);
+    }
+  };
+
   return (
     <group ref={solarSystemRef}>
       {solarSystemChildren.map((planet, index) => (
-        <primitive key={index} object={planet} />
+        <primitive
+          key={index}
+          object={planet}
+          onPointerOver={() => handlePointerOver(planet)}
+          onPointerOut={handlePointerOut}
+          onClick={() => handlePlanetClick(planet)}
+          scale={hoveredPlanet === planet ? 1.2 : 1}
+        />
       ))}
       <primitive object={getAsteroidBelt(objs)} />
       <primitive object={getElipticLines()} />
@@ -82,7 +105,41 @@ const SolarSystem = () => {
   );
 };
 
+const CameraController = ({ selectedPlanet }) => {
+  const cameraRef = useRef();
+  const targetRef = useRef(new THREE.Vector3(0, 0, 0));
+  const smoothingFactor = 0.1;
+
+  useFrame(() => {
+    if (selectedPlanet && cameraRef.current) {
+      // Get current camera position and target
+      const currentPos = cameraRef.current.position;
+      const targetPos = new THREE.Vector3(
+        selectedPlanet.position.x, 
+        selectedPlanet.position.y, 
+        selectedPlanet.position.z + 1
+      );
+
+      // Smooth the camera movement
+      currentPos.lerp(targetPos, smoothingFactor);
+
+      // Set camera's look-at position (smoothing the look-at target too)
+      targetRef.current.lerp(selectedPlanet.position, smoothingFactor);
+      cameraRef.current.lookAt(targetRef.current);
+    }
+  });
+
+  return null;
+};
+
+
 const Scene = () => {
+  const [selectedPlanet, setSelectedPlanet] = useState(null);
+
+  const handlePlanetClick = (planet) => {
+    setSelectedPlanet(planet);
+  };
+
   return (
     <div style={{ height: '100vh', width: '100vw', backgroundColor: 'black' }}>
       <Canvas camera={{ position: [0, 2.5, 4], fov: 75 }} style={{ width: '100%', height: '100%' }}>
@@ -90,7 +147,8 @@ const Scene = () => {
         <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
         <OrbitControls enableDamping dampingFactor={0.03} />
         <Suspense fallback={null}>
-          <SolarSystem />
+          <SolarSystem onPlanetClick={handlePlanetClick} />
+          <CameraController selectedPlanet={selectedPlanet} />
         </Suspense>
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
