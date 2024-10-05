@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { getFresnelMat } from './getFresnelMat.js';
+import { getFresnelMat } from './getFresnelMat.jsx';
 
 const texLoader = new THREE.TextureLoader();
 const geo = new THREE.IcosahedronGeometry(1, 6);

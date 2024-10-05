@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { getFresnelMat } from "./getFresnelMat.js";
-import { ImprovedNoise } from '../../node_modules/three/examples/jsm/math/ImprovedNoise.js';
+import { getFresnelMat } from "./getFresnelMat.jsx";
+import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 // sun
 
 function getCorona() {
