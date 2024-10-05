@@ -6,7 +6,6 @@ import Home from './components/pages/Home.jsx';
 import SignUp from './components/pages/SignUp.jsx';
 import AboutMe from './components/pages/AboutMe.jsx';
 import Projects from './components/pages/Projects.jsx';
-import SolarSystemComponent from './components/pages/SolarSystemComponent.jsx';
 
 function App() {
   return (

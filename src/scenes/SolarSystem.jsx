@@ -1,167 +1,99 @@
-import * as THREE from "three";
-import { OrbitControls } from '../../node_modules/three/examples/jsm/controls/OrbitControls.js';
-import { OBJLoader } from "../../node_modules/three/examples/jsm/loaders/OBJLoader.js"
-import getSun from "../solar-system/getSun.js";
-import getNebula from "../solar-system/getNebula.js";
-import getStarfield from "../solar-system/getStarfield.js";
-import getPlanet from "../solar-system/getPlanet.js";
-import getAsteroidBelt from "../solar-system/getAsteroidBelt.js";
-import getElipticLines from "../solar-system/getElipticLines.js";
+import React, { Suspense, useRef, useState, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Stars } from '@react-three/drei';
+import * as THREE from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import getSun from '../solar-system/getSun';
+import getNebula from '../solar-system/getNebula';
+import getStarfield from '../solar-system/getStarfield';
+import getPlanet from '../solar-system/getPlanet';
+import getAsteroidBelt from '../solar-system/getAsteroidBelt';
+import getElipticLines from '../solar-system/getElipticLines';
 
-const w = window.innerWidth;
-const h = window.innerHeight;
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
-camera.position.set(0, 2.5, 4);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(w, h);
-// renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// renderer.outputColorSpace = THREE.SRGBColorSpace;
-document.body.appendChild(renderer.domElement);
+const SolarSystem = () => {
+  const [objs, setObjs] = useState([]);
+  const solarSystemRef = useRef();
 
-// const wireMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true});
-// scene.overrideMaterial = wireMat;
+  useEffect(() => {
+    const manager = new THREE.LoadingManager();
+    const loader = new OBJLoader(manager);
+    const loadedObjs = [];
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.03;
-const useAnimatedCamera = true;
-function initScene(data) {
-  const { objs } = data;
-  const solarSystem = new THREE.Group();
-  solarSystem.userData.update = (t) => {
-    solarSystem.children.forEach((child) => {
-      child.userData.update?.(t);
+    const objNames = ['Rock1', 'Rock2', 'Rock3'];
+    objNames.forEach((name) => {
+      let path = `./rocks/${name}.obj`;
+      loader.load(path, (obj) => {
+        obj.traverse((child) => {
+          if (child.isMesh) {
+            loadedObjs.push(child);
+          }
+        });
+      });
     });
-  };
-  scene.add(solarSystem);
 
-  const sun = getSun();
-  solarSystem.add(sun);
+    manager.onLoad = () => {
+      setObjs(loadedObjs);
+    };
+  }, []);
 
+  // Define planets as Three.js objects
   const mercury = getPlanet({ size: 0.1, distance: 1.25, img: 'mercury.png' });
-  solarSystem.add(mercury);
-
   const venus = getPlanet({ size: 0.2, distance: 1.65, img: 'venus.png' });
-  solarSystem.add(venus);
-
   const moon = getPlanet({ size: 0.075, distance: 0.4, img: 'moon.png' });
   const earth = getPlanet({ children: [moon], size: 0.225, distance: 2.0, img: 'earth.png' });
-  solarSystem.add(earth);
-
   const mars = getPlanet({ size: 0.15, distance: 2.25, img: 'mars.png' });
-  solarSystem.add(mars);
-
-  const asteroidBelt = getAsteroidBelt(objs);
-  solarSystem.add(asteroidBelt);
-
   const jupiter = getPlanet({ size: 0.4, distance: 2.75, img: 'jupiter.png' });
-  solarSystem.add(jupiter);
 
-  const sRingGeo = new THREE.TorusGeometry(0.6, 0.15, 8, 64);
-  const sRingMat = new THREE.MeshStandardMaterial();
-  const saturnRing = new THREE.Mesh(sRingGeo, sRingMat);
-  saturnRing.scale.z = 0.1;
-  saturnRing.rotation.x = Math.PI * 0.5;
-  const saturn = getPlanet({ children: [saturnRing], size: 0.35, distance: 3.25, img: 'saturn.png' });
-  solarSystem.add(saturn);
+  const solarSystemChildren = [mercury, venus, earth, mars, jupiter]; // Add other planets similarly
 
-  const uRingGeo = new THREE.TorusGeometry(0.5, 0.05, 8, 64);
-  const uRingMat = new THREE.MeshStandardMaterial();
-  const uranusRing = new THREE.Mesh(uRingGeo, uRingMat);
-  uranusRing.scale.z = 0.1;
-  const uranus = getPlanet({ children: [uranusRing], size: 0.3, distance: 3.75, img: 'uranus.png' });
-  solarSystem.add(uranus);
+  // Animation loop using useFrame (inside Canvas)
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime() * 0.1;
+    const solarSystem = solarSystemRef.current;
 
-  const neptune = getPlanet({ size: 0.3, distance: 4.25, img: 'neptune.png' });
-  solarSystem.add(neptune);
-
-  const elipticLines = getElipticLines();
-  solarSystem.add(elipticLines);
-
-  const starfield = getStarfield({ numStars: 500, size: 0.35 });
-  scene.add(starfield);
-
-  const dirLight = new THREE.DirectionalLight(0x0099ff, 1);
-  dirLight.position.set(0, 1, 0);
-  scene.add(dirLight);
-
-  const nebula = getNebula({
-    hue: 0.6,
-    numSprites: 10,
-    opacity: 0.2,
-    radius: 40,
-    size: 80,
-    z: -50.5,
-  });
-  scene.add(nebula);
-
-  const anotherNebula = getNebula({
-    hue: 0.0,
-    numSprites: 10,
-    opacity: 0.2,
-    radius: 40,
-    size: 80,
-    z: 50.5,
-  });
-  scene.add(anotherNebula);
-
-  const cameraDistance = 5;
-  function animate(t = 0) {
-    const time = t * 0.0002;
-    requestAnimationFrame(animate);
-    solarSystem.userData.update(time);
-    renderer.render(scene, camera);
-    if (useAnimatedCamera) {
-      camera.position.x = Math.cos(time * 0.75) * cameraDistance;
-      camera.position.y = Math.cos(time * 0.75);
-      camera.position.z = Math.sin(time * 0.75) * cameraDistance;
-      camera.lookAt(0, 0, 0);
-    } else {
-      controls.update();
+    if (solarSystem) {
+      solarSystem.children.forEach((child) => {
+        if (child.userData.update) {
+          child.userData.update(time);
+        }
+      });
     }
-  }
 
-  animate();
-}
-
-const sceneData = {
-  objs: [],
-};
-const manager = new THREE.LoadingManager();
-manager.onLoad = () => initScene(sceneData);
-const loader = new OBJLoader(manager);
-const objs = ['Rock1', 'Rock2', 'Rock3'];
-objs.forEach((name) => {
-  let path = `./rocks/${name}.obj`;
-  loader.load(path, (obj) => {
-    obj.traverse((child) => {
-      if (child.isMesh) {
-        sceneData.objs.push(child);
-      }
-    });
+    // Animate the camera
+    const cameraDistance = 5;
+    state.camera.position.x = Math.cos(time * 0.75) * cameraDistance;
+    state.camera.position.y = Math.cos(time * 0.75);
+    state.camera.position.z = Math.sin(time * 0.75) * cameraDistance;
+    state.camera.lookAt(0, 0, 0);
   });
-});
 
+  return (
+    <group ref={solarSystemRef}>
+      {solarSystemChildren.map((planet, index) => (
+        <primitive key={index} object={planet} />
+      ))}
+      <primitive object={getAsteroidBelt(objs)} />
+      <primitive object={getElipticLines()} />
+      <primitive object={getSun()} />
+      <primitive object={getStarfield({ numStars: 500, size: 0.35 })} />
+      <primitive object={getNebula({ hue: 0.6, numSprites: 10, opacity: 0.2, radius: 40, size: 80, z: -50.5 })} />
+      <primitive object={getNebula({ hue: 0.0, numSprites: 10, opacity: 0.2, radius: 40, size: 80, z: 50.5 })} />
+    </group>
+  );
+};
 
-function handleWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
-window.addEventListener('resize', handleWindowResize, false);
+const Scene = () => {
+  return (
+    <Canvas camera={{ position: [0, 2.5, 4], fov: 75 }}>
+      <ambientLight />
+      <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
+      <OrbitControls enableDamping dampingFactor={0.03} />
+      <Suspense fallback={null}>
+        <SolarSystem />
+      </Suspense>
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
+    </Canvas>
+  );
+};
 
-export function mount( container ) {
-
-	if( container ) {
-
-		container.insertBefore( renderer.domElement, container.firstChild );
-		resize();
-
-	} else {
-
-		renderer.domElement.remove();
-
-	}
-
-}
+export default Scene;
