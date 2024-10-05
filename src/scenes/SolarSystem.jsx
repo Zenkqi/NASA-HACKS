@@ -13,6 +13,14 @@ import getElipticLines from '../solar-system/getElipticLines';
 const SolarSystem = () => {
   const [objs, setObjs] = useState([]);
   const solarSystemRef = useRef();
+  
+  const planetRefs = useRef({
+    mercury: useRef(),
+    venus: useRef(),
+    earth: useRef(),
+    mars: useRef(),
+    jupiter: useRef(),
+  });
 
   useEffect(() => {
     const manager = new THREE.LoadingManager();
@@ -44,33 +52,31 @@ const SolarSystem = () => {
   const mars = getPlanet({ size: 0.15, distance: 2.25, img: 'mars.png' });
   const jupiter = getPlanet({ size: 0.4, distance: 2.75, img: 'jupiter.png' });
 
-  const solarSystemChildren = [mercury, venus, earth, mars, jupiter]; // Add other planets similarly
+  // Reference each planet so we can animate it
+  const planets = [
+    { ref: planetRefs.current.mercury, obj: mercury, speed: 0.4, distance: 1.25 },
+    { ref: planetRefs.current.venus, obj: venus, speed: 0.3, distance: 1.65 },
+    { ref: planetRefs.current.earth, obj: earth, speed: 0.2, distance: 2.0 },
+    { ref: planetRefs.current.mars, obj: mars, speed: 0.17, distance: 2.25 },
+    { ref: planetRefs.current.jupiter, obj: jupiter, speed: 0.1, distance: 2.75 },
+  ];
 
-  // Animation loop using useFrame (inside Canvas)
-  useFrame((state) => {
-    const time = state.clock.getElapsedTime() * 0.1;
-    const solarSystem = solarSystemRef.current;
-
-    if (solarSystem) {
-      solarSystem.children.forEach((child) => {
-        if (child.userData.update) {
-          child.userData.update(time);
-        }
-      });
-    }
-
-    // Animate the camera
-    const cameraDistance = 5;
-    state.camera.position.x = Math.cos(time * 0.75) * cameraDistance;
-    state.camera.position.y = Math.cos(time * 0.75);
-    state.camera.position.z = Math.sin(time * 0.75) * cameraDistance;
-    state.camera.lookAt(0, 0, 0);
+  // Animate planets in their orbits using `useFrame`
+  useFrame(({ clock }) => {
+    const elapsed = clock.getElapsedTime();
+    
+    planets.forEach(({ ref, speed, distance }) => {
+      if (ref.current) {
+        ref.current.position.x = Math.cos(elapsed * speed) * distance;
+        ref.current.position.z = Math.sin(elapsed * speed) * distance;
+      }
+    });
   });
 
   return (
     <group ref={solarSystemRef}>
-      {solarSystemChildren.map((planet, index) => (
-        <primitive key={index} object={planet} />
+      {planets.map(({ ref, obj }, index) => (
+        <primitive key={index} object={obj} ref={ref} />
       ))}
       <primitive object={getAsteroidBelt(objs)} />
       <primitive object={getElipticLines()} />
@@ -88,7 +94,13 @@ const Scene = () => {
       <Canvas camera={{ position: [0, 2.5, 4], fov: 75 }} style={{ width: '100%', height: '100%' }}>
         <ambientLight />
         <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
-        <OrbitControls enableDamping dampingFactor={0.03} />
+        <OrbitControls 
+          enableDamping 
+          dampingFactor={0.1} 
+          rotateSpeed={0.7} 
+          enableZoom={true} 
+          enablePan={true} 
+        />
         <Suspense fallback={null}>
           <SolarSystem />
         </Suspense>
