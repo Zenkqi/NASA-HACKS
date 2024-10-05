@@ -22,18 +22,21 @@ const SolarSystem = () => {
     jupiter: useRef(),
   });
 
+  const rockRefs = useRef([]);
+
   useEffect(() => {
     const manager = new THREE.LoadingManager();
     const loader = new OBJLoader(manager);
     const loadedObjs = [];
 
     const objNames = ['Rock1', 'Rock2', 'Rock3'];
-    objNames.forEach((name) => {
+    objNames.forEach((name, index) => {
       let path = `./rocks/${name}.obj`;
       loader.load(path, (obj) => {
         obj.traverse((child) => {
           if (child.isMesh) {
             loadedObjs.push(child);
+            rockRefs.current[index] = child;
           }
         });
       });
@@ -61,7 +64,7 @@ const SolarSystem = () => {
     { ref: planetRefs.current.jupiter, obj: jupiter, speed: 0.1, distance: 2.75 },
   ];
 
-  // Animate planets in their orbits using `useFrame`
+  // Animate planets and rocks in their orbits using useFrame
   useFrame(({ clock }) => {
     const elapsed = clock.getElapsedTime();
     
@@ -71,12 +74,24 @@ const SolarSystem = () => {
         ref.current.position.z = Math.sin(elapsed * speed) * distance;
       }
     });
+
+    rockRefs.current.forEach((rock, index) => {
+      if (rock) {
+        rock.rotation.x += 0.01;
+        rock.rotation.y += 0.01;
+        rock.position.x = Math.cos(elapsed * 0.1 + index) * 2;
+        rock.position.z = Math.sin(elapsed * 0.1 + index) * 2;
+      }
+    });
   });
 
   return (
     <group ref={solarSystemRef}>
       {planets.map(({ ref, obj }, index) => (
         <primitive key={index} object={obj} ref={ref} />
+      ))}
+      {objs.map((obj, index) => (
+        <primitive key={index} object={obj} />
       ))}
       <primitive object={getAsteroidBelt(objs)} />
       <primitive object={getElipticLines()} />
@@ -104,7 +119,6 @@ const Scene = () => {
         <Suspense fallback={null}>
           <SolarSystem />
         </Suspense>
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
     </div>
   );
