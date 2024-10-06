@@ -22,6 +22,9 @@ const SolarSystem = ({ setSelectedObject }) => {
   const sunRef = useRef();
   const sunPosition = new THREE.Vector3(0, 0, 0);
 
+  // filters
+  const [sizeFilter, setSizeFilter] = useState(0);
+
   // Load asteroid objects using OBJLoader
   useEffect(() => {
     const manager = new THREE.LoadingManager();
@@ -102,6 +105,7 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: mercury,
       speed: 0.4,
+      size: 0.1,
       distanceX: 1.25 * 2,
       distanceZ: 1.25 * 3,
       name: 'Mercury',
@@ -112,6 +116,7 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: venus,
       speed: 0.3,
+      size: 0.2,
       distanceX: 1.65 * 2,
       distanceZ: 1.65 * 3,
       name: 'Venus',
@@ -122,6 +127,7 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: earthObj,
       speed: 0.2,
+      size: 0.225,
       distanceX: 2.0 * 2,
       distanceZ: 2.0 * 3,
       name: 'Earth',
@@ -133,6 +139,7 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: mars,
       speed: 0.17,
+      size: 0.15,
       distanceX: 2.25 * 2,
       distanceZ: 2.25 * 3,
       name: 'Mars',
@@ -143,6 +150,7 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: jupiter,
       speed: 0.1,
+      size: 0.4,
       distanceX: 2.75 * 2,
       distanceZ: 2.75 * 3,
       name: 'Jupiter',
@@ -153,17 +161,18 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: saturn,
       speed: 0.083,
+      size: 0.35,
       distanceX: 3.25 * 2,
       distanceZ: 3.25 * 3,
       name: 'Saturn',
       info: 'Saturn is known for its prominent ring system.',
       composition: 'Saturn is a gas giant composed mainly of hydrogen and helium.',
       orbitDetails: 'Saturn takes about 29 Earth years to orbit the Sun.',
-      ring: true,
     },
     {
       obj: uranus,
       speed: 0.047,
+      size: 0.3,
       distanceX: 3.75 * 2,
       distanceZ: 3.75 * 3,
       name: 'Uranus',
@@ -174,6 +183,7 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: neptune,
       speed: 0.038,
+      size: 0.3,
       distanceX: 4.25 * 2,
       distanceZ: 4.25 * 3,
       name: 'Neptune',
@@ -185,6 +195,7 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: moonObj,
       speed: 1.0, // Speed of the moon's orbit around Earth
+      size: 0.075,
       distanceX: 0.5, // Distance from Earth
       distanceZ: 0.6,
       name: 'Moon',
@@ -207,13 +218,14 @@ const SolarSystem = ({ setSelectedObject }) => {
   return (
     <group ref={solarSystemRef}>
       {planets.map((planet, index) => (
+        planet.size > sizeFilter ? (
         <Planet
           key={index}
           planet={planet}
           sunPosition={sunPosition}
           setSelectedObject={setSelectedObject}
           ref={planet.ref}
-        />
+        />) : (<></>)
       ))}
       <primitive object={asteroidBelt} />
       <primitive object={sun} ref={sunRef} />
