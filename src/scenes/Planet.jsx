@@ -35,7 +35,7 @@ const Planet = forwardRef(({ planet, sunPosition, setSelectedObject }, ref) => {
       } else {
         // Planet orbiting around the sun
         const x = sunPosition.x + Math.cos(elapsed * speed) * distance;
-        const z = sunPosition.z + Math.sin(elapsed * speed) * distance;
+        const z = sunPosition.z + Math.sin(elapsed * speed) * distance*2;
         actualRef.current.position.x = x;
         actualRef.current.position.y = sunPosition.y;
         actualRef.current.position.z = z;
