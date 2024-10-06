@@ -24,7 +24,7 @@ function usePrevious(value) {
 }
 
 const Planet = ({ planet, sunPosition, setSelectedPlanet }) => {
-  const { obj, name, info, speed, distance } = planet;
+  const { obj, name, info, speed, distance, composition, orbitDetails } = planet;
   const ref = useRef();
 
   useFrame(({ clock }) => {
@@ -42,7 +42,7 @@ const Planet = ({ planet, sunPosition, setSelectedPlanet }) => {
     <group
       ref={ref}
       onClick={() => {
-        setSelectedPlanet({ name, info, ref });
+        setSelectedPlanet({ name, info, composition, orbitDetails, ref });
       }}
       cursor="pointer"
     >
@@ -99,6 +99,9 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   );
   const mars = useMemo(() => getPlanet({ size: 0.15, img: 'mars.png' }), []);
   const jupiter = useMemo(() => getPlanet({ size: 0.4, img: 'jupiter.png' }), []);
+  const saturn = useMemo(() => getPlanet({ size: 0.35, img: 'saturn.png', ring: true }), []);
+  const uranus = useMemo(() => getPlanet({ size: 0.3, img: 'uranus.png' }), []);
+  const neptune = useMemo(() => getPlanet({ size: 0.3, img: 'neptune.png' }), []);
 
   // Memoize other objects to prevent re-creation
   const sun = useMemo(() => getSun(), []);
@@ -138,6 +141,8 @@ const SolarSystem = ({ setSelectedPlanet }) => {
       distance: 1.25,
       name: 'Mercury',
       info: 'Mercury is the closest planet to the Sun.',
+      composition: 'Mercury is a rocky planet with a solid, cratered surface.',
+      orbitDetails: 'Mercury has the shortest orbit around the Sun at 88 Earth days.',
     },
     {
       obj: venus,
@@ -145,6 +150,8 @@ const SolarSystem = ({ setSelectedPlanet }) => {
       distance: 1.65,
       name: 'Venus',
       info: 'Venus is the second planet from the Sun.',
+      composition: 'Venus has a thick atmosphere composed mainly of carbon dioxide.',
+      orbitDetails: 'Venus orbits the Sun every 225 Earth days.',
     },
     {
       obj: earth,
@@ -152,6 +159,8 @@ const SolarSystem = ({ setSelectedPlanet }) => {
       distance: 2.0,
       name: 'Earth',
       info: 'Earth is our home planet.',
+      composition: 'Earth has a diverse composition with oceans, continents, and an atmosphere.',
+      orbitDetails: 'Earth orbits the Sun every 365.25 days.',
     },
     {
       obj: mars,
@@ -159,6 +168,8 @@ const SolarSystem = ({ setSelectedPlanet }) => {
       distance: 2.25,
       name: 'Mars',
       info: 'Mars is the fourth planet from the Sun.',
+      composition: 'Mars is known as the Red Planet due to its iron oxide-rich surface.',
+      orbitDetails: 'Mars takes about 687 Earth days to orbit the Sun.',
     },
     {
       obj: jupiter,
@@ -166,6 +177,35 @@ const SolarSystem = ({ setSelectedPlanet }) => {
       distance: 2.75,
       name: 'Jupiter',
       info: 'Jupiter is the largest planet in the Solar System.',
+      composition: 'Jupiter is a gas giant composed mainly of hydrogen and helium.',
+      orbitDetails: 'Jupiter takes about 12 Earth years to orbit the Sun.',
+    },
+    {
+      obj: saturn,
+      speed: 0.083,
+      distance: 3.25,
+      name: 'Saturn',
+      info: 'Saturn is known for its prominent ring system.',
+      composition: 'Saturn is a gas giant composed mainly of hydrogen and helium.',
+      orbitDetails: 'Saturn takes about 29 Earth years to orbit the Sun.',
+    },
+    {
+      obj: uranus,
+      speed: 0.047,
+      distance: 3.75,
+      name: 'Uranus',
+      info: 'Uranus is an ice giant with a unique tilt.',
+      composition: 'Uranus has an atmosphere of hydrogen, helium, and methane.',
+      orbitDetails: 'Uranus takes about 84 Earth years to orbit the Sun.',
+    },
+    {
+      obj: neptune,
+      speed: 0.038,
+      distance: 4.25,
+      name: 'Neptune',
+      info: 'Neptune is the farthest known planet from the Sun in the Solar System.',
+      composition: 'Neptune is an ice giant with a composition similar to Uranus.',
+      orbitDetails: 'Neptune takes about 165 Earth years to orbit the Sun.',
     },
   ];
 
@@ -350,6 +390,7 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
 
 const Scene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview'); // New state for active tab
   const controlsRef = useRef();
 
   return (
@@ -386,36 +427,107 @@ const Scene = () => {
         />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
-      {/* Render infobox in the center of the screen when a planet is selected */}
-      {selectedPlanet && (
-        <div
+      {/* Infobox */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          height: '100%',
+          width: '300px',
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          transform: selectedPlanet ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform 0.5s ease-in-out',
+          boxShadow: '-2px 0 5px rgba(0,0,0,0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Close Button */}
+        <button
+          onClick={() => {
+            setSelectedPlanet(null);
+            setActiveTab('overview'); // Reset active tab
+          }}
           style={{
             position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'rgba(255,255,255,0.8)',
-            padding: '10px',
-            borderRadius: '5px',
+            top: '10px',
+            right: '10px',
+            backgroundColor: 'transparent',
+            color: '#000',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
           }}
         >
-          <h3>{selectedPlanet.name}</h3>
-          <p>{selectedPlanet.info}</p>
-          <select>
-            <option value="overview">Overview</option>
-            <option value="composition">Composition</option>
-            <option value="orbit">Orbit Details</option>
-            {/* Add more options as needed */}
-          </select>
-          <button
-            onClick={() => {
-              setSelectedPlanet(null);
-            }}
-          >
-            Close
-          </button>
-        </div>
-      )}
+          &times;
+        </button>
+        {selectedPlanet && (
+          <>
+            {/* Tabs */}
+            <div style={{ display: 'flex', borderBottom: '1px solid #ccc', marginTop: '50px' }}>
+              <button
+                onClick={() => setActiveTab('overview')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  backgroundColor: activeTab === 'overview' ? '#e0e0e0' : 'transparent',
+                  border: 'none',
+                  borderBottom: activeTab === 'overview' ? '2px solid #000' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('composition')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  backgroundColor: activeTab === 'composition' ? '#e0e0e0' : 'transparent',
+                  border: 'none',
+                  borderBottom: activeTab === 'composition' ? '2px solid #000' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Composition
+              </button>
+              <button
+                onClick={() => setActiveTab('orbit')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  backgroundColor: activeTab === 'orbit' ? '#e0e0e0' : 'transparent',
+                  border: 'none',
+                  borderBottom: activeTab === 'orbit' ? '2px solid #000' : 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Orbit Details
+              </button>
+            </div>
+            {/* Content */}
+            <div style={{ padding: '10px', overflowY: 'auto', flex: 1 }}>
+              <h2>{selectedPlanet.name}</h2>
+              {activeTab === 'overview' && (
+                <div>
+                  <p>{selectedPlanet.info}</p>
+                </div>
+              )}
+              {activeTab === 'composition' && (
+                <div>
+                  <p>{selectedPlanet.composition}</p>
+                </div>
+              )}
+              {activeTab === 'orbit' && (
+                <div>
+                  <p>{selectedPlanet.orbitDetails}</p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
