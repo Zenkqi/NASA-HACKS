@@ -79,15 +79,15 @@ const SolarSystem = ({ setSelectedObject }) => {
   }, []);
 
   // Memoize planet objects to prevent re-creation on every render
-  const mercury = useMemo(() => getPlanet({ size: 0.05, img: 'mercury.png' }), []);
+  const mercury = useMemo(() => getPlanet({ size: 0.1, img: 'mercury.png' }), []);
   const venus = useMemo(() => getPlanet({ size: 0.2, img: 'venus.png' }), []);
-  const moonObj = useMemo(() => getPlanet({ size: 0.04, img: 'moon.png' }), []);
+  const moonObj = useMemo(() => getPlanet({ size: 0.02, img: 'moon.png' }), []);
   const earthObj = useMemo(() => getPlanet({ size: 0.2, img: 'earth.png' }), []);
-  const mars = useMemo(() => getPlanet({ size: 0.14, img: 'mars.png' }), []);
-  const jupiter = useMemo(() => getPlanet({ size: 0.9, img: 'jupiter.png' }), []);
-  const saturn = useMemo(() => getPlanet({ size: 0.8, img: 'saturn.png', ring: true }), []);
-  const uranus = useMemo(() => getPlanet({ size: 0.6, img: 'uranus.png' }), []);
-  const neptune = useMemo(() => getPlanet({ size: 0.4, img: 'neptune.png' }), []);
+  const mars = useMemo(() => getPlanet({ size: 0.15, img: 'mars.png' }), []);
+  const jupiter = useMemo(() => getPlanet({ size: 0.45, img: 'jupiter.png' }), []);
+  const saturn = useMemo(() => getPlanet({ size: 0.4, img: 'saturn.png', ring: true }), []);
+  const uranus = useMemo(() => getPlanet({ size: 0.3, img: 'uranus.png' }), []);
+  const neptune = useMemo(() => getPlanet({ size: 0.2, img: 'neptune.png' }), []);
 
   // Memoize other objects to prevent re-creation
   const sun = useMemo(() => getSun('../../textures/sun.png'), []);
@@ -127,9 +127,9 @@ const SolarSystem = ({ setSelectedObject }) => {
   const planets = [
     {
       obj: mercury,
-      speed: 2.75,
-      distanceX: 1.25 * 2,
-      distanceZ: 1.25 * 3,
+      speed: 0.6,
+      distanceX: 1 * 2,
+      distanceZ: 1 * 3,
       name: 'Mercury',
       info: 'Mercury is the closest planet to the Sun.',
       distanceFromSun: '0.4 AU (58 million km)',
@@ -139,9 +139,9 @@ const SolarSystem = ({ setSelectedObject }) => {
     },
     {
       obj: venus,
-      speed: 1.6,
-      distanceX: 2.5 * 2,
-      distanceZ: 2.5 * 3,
+      speed: 0.5,
+      distanceX: 1.25 * 2,
+      distanceZ: 1.25 * 3,
       name: 'Venus',
       info: 'Venus is the second planet from the Sun.',
       distanceFromSun: '0.72 AU (108 million km)',
@@ -151,9 +151,9 @@ const SolarSystem = ({ setSelectedObject }) => {
     },
     {
       obj: earthObj,
-      speed: 1.0,
-      distanceX: 3.1 * 2,
-      distanceZ: 3.1 * 3,
+      speed: 0.27,
+      distanceX: 2 * 2,
+      distanceZ: 2 * 3,
       name: 'Earth',
       info: 'Earth is our home planet.',
       distanceFromSun: '1 AU (~150 million km)',
@@ -164,9 +164,9 @@ const SolarSystem = ({ setSelectedObject }) => {
     },
     {
       obj: mars,
-      speed: 0.531,
-      distanceX: 3.8 * 2,
-      distanceZ: 3.8 * 3,
+      speed: 0.12,
+      distanceX: 2.7 * 2,
+      distanceZ: 2.7 * 3,
       name: 'Mars',
       info: 'Mars is the fourth planet from the Sun.',
       distanceFromSun: '1.5 AU (228 million km)',
@@ -176,9 +176,9 @@ const SolarSystem = ({ setSelectedObject }) => {
     },
     {
       obj: jupiter,
-      speed: 0.1,
-      distanceX: 7.5 * 2,
-      distanceZ: 7.5 * 3,
+      speed: 0.075,
+      distanceX: 5 * 2,
+      distanceZ: 5 * 3,
       name: 'Jupiter',
       info: 'Jupiter is the largest planet in the Solar System.',
       distanceFromSun: '5.2 AU (778 million km)',
@@ -188,9 +188,9 @@ const SolarSystem = ({ setSelectedObject }) => {
     },
     {
       obj: saturn,
-      speed: 0.075,
-      distanceX: 9.5 * 2,
-      distanceZ: 9.5 * 3,
+      speed: 0.05,
+      distanceX: 7 * 2,
+      distanceZ: 7 * 3,
       name: 'Saturn',
       info: 'Saturn is known for its prominent ring system.',
       distanceFromSun: '9.5 AU (1.4 billion km)',
@@ -201,9 +201,9 @@ const SolarSystem = ({ setSelectedObject }) => {
     },
     {
       obj: uranus,
-      speed: 0.05625,
-      distanceX: 12 * 2,
-      distanceZ: 12 * 3,
+      speed: 0.026,
+      distanceX: 9 * 2,
+      distanceZ: 9 * 3,
       name: 'Uranus',
       info: 'Uranus is an ice giant with a unique tilt.',
       distanceFromSun: '19 AU (2.9 billion km)',
@@ -213,9 +213,9 @@ const SolarSystem = ({ setSelectedObject }) => {
     },
     {
       obj: neptune,
-      speed: 0.0422,
-      distanceX: 14.5 * 2,
-      distanceZ: 14.5 * 3,
+      speed: 0.01,
+      distanceX: 11 * 2,
+      distanceZ: 11 * 3,
       name: 'Neptune',
       info: 'Neptune is the farthest known planet from the Sun in the Solar System.',
       distanceFromSun: '30 AU (4.5 billion km)',
