@@ -62,7 +62,7 @@ const Planet = forwardRef(({ planet, sunPosition, setSelectedObject }, ref) => {
       {/* Conditionally render rings if the ring property is true */}
       {ring && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.4, 0.6, 64]} /> {/* Adjust sizes as needed */}
+          <ringGeometry args={[0.6, 0.9, 64]} /> {/* Adjust sizes as needed */}
           <meshBasicMaterial
             map={ringTexture}
             side={THREE.DoubleSide}

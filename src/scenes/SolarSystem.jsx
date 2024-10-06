@@ -207,6 +207,7 @@ const SolarSystem = ({ setSelectedObject }) => {
       composition: 'Saturn is a gas giant composed mainly of hydrogen and helium.',
       rotationDetails: "One Saturn Day: 10.7 hours",
       orbitDetails: 'Orbit Duration: 10,756 Earth days or 29.4 Earth years.',
+      ring: true,
     },
     {
       obj: uranus,

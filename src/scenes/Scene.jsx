@@ -19,19 +19,16 @@ const Scene = () => {
         backgroundColor: 'black',
       }}
     >
-
-      <div 
-          // Button
-          style={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            zIndex: 100,
-            width: '100%', 
-            height: '100%', 
-            //overflow: 'hidden' // Ensure no scrollbars
-          }
-        }
+      {/* Adjusted SideBar Container */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 100,
+          width: '100%',
+          height: '60px', // Set to the height of your navbar
+        }}
       >
         <SideBar />
       </div>
@@ -40,7 +37,6 @@ const Scene = () => {
         camera={{ position: [0, 2.5, 4], fov: 75 }}
         style={{ width: '100%', height: '100%' }}
       >
-        
         <ambientLight />
         <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
         <OrbitControls
@@ -62,7 +58,6 @@ const Scene = () => {
         />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
-      
 
       {/* Infobox */}
       {selectedObject && (
