@@ -1,5 +1,5 @@
 // Import necessary libraries and components
-import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react';
+import React, { Suspense, useRef, useState, useEffect, useMemo, forwardRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
@@ -23,33 +23,58 @@ function usePrevious(value) {
   return ref.current;
 }
 
-const Planet = ({ planet, sunPosition, setSelectedPlanet }) => {
-  const { obj, name, info, speed, distance, composition, orbitDetails } = planet;
-  const ref = useRef();
+const Planet = forwardRef(({ planet, sunPosition, setSelectedPlanet }, ref) => {
+  const {
+    obj,
+    name,
+    info,
+    speed,
+    distance,
+    composition,
+    orbitDetails,
+    isMoon,
+    parentRef,
+  } = planet;
+
+  const localRef = useRef();
+  const actualRef = ref || localRef;
 
   useFrame(({ clock }) => {
-    if (ref.current) {
+    if (actualRef.current) {
       const elapsed = clock.getElapsedTime();
-      const x = sunPosition.x + Math.cos(elapsed * speed) * distance;
-      const z = sunPosition.z + Math.sin(elapsed * speed) * distance;
-      ref.current.position.x = x;
-      ref.current.position.y = sunPosition.y;
-      ref.current.position.z = z;
+
+      if (isMoon && parentRef && parentRef.current) {
+        // Moon orbiting around its parent planet
+        const parentPosition = parentRef.current.position;
+        const x = parentPosition.x + Math.cos(elapsed * speed) * distance;
+        const z = parentPosition.z + Math.sin(elapsed * speed) * distance;
+        actualRef.current.position.x = x;
+        actualRef.current.position.y = parentPosition.y; // Assuming same plane
+        actualRef.current.position.z = z;
+      } else {
+        // Planet orbiting around the sun
+        const x = sunPosition.x + Math.cos(elapsed * speed) * distance;
+        const z = sunPosition.z + Math.sin(elapsed * speed) * distance;
+        actualRef.current.position.x = x;
+        actualRef.current.position.y = sunPosition.y;
+        actualRef.current.position.z = z;
+      }
     }
   });
 
   return (
     <group
-      ref={ref}
-      onClick={() => {
-        setSelectedPlanet({ name, info, composition, orbitDetails, ref });
+      ref={actualRef}
+      onClick={(event) => {
+        event.stopPropagation(); // Prevent click event from propagating to parent
+        setSelectedPlanet({ name, info, composition, orbitDetails, ref: actualRef });
       }}
       cursor="pointer"
     >
       <primitive object={obj} />
     </group>
   );
-};
+});
 
 const SolarSystem = ({ setSelectedPlanet }) => {
   const [objs, setObjs] = useState([]);
@@ -92,11 +117,8 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   // Memoize planet objects to prevent re-creation on every render
   const mercury = useMemo(() => getPlanet({ size: 0.1, img: 'mercury.png' }), []);
   const venus = useMemo(() => getPlanet({ size: 0.2, img: 'venus.png' }), []);
-  const moon = useMemo(() => getPlanet({ size: 0.075, img: 'moon.png' }), []);
-  const earth = useMemo(
-    () => getPlanet({ children: [moon], size: 0.225, img: 'earth.png' }),
-    [moon]
-  );
+  const moonObj = useMemo(() => getPlanet({ size: 0.075, img: 'moon.png' }), []);
+  const earthObj = useMemo(() => getPlanet({ size: 0.225, img: 'earth.png' }), []);
   const mars = useMemo(() => getPlanet({ size: 0.15, img: 'mars.png' }), []);
   const jupiter = useMemo(() => getPlanet({ size: 0.4, img: 'jupiter.png' }), []);
   const saturn = useMemo(() => getPlanet({ size: 0.35, img: 'saturn.png', ring: true }), []);
@@ -133,6 +155,10 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     []
   );
 
+  // Refs for planets and moon
+  const earthRef = useRef();
+  const moonRef = useRef();
+
   // Define the planets and their orbital properties
   const planets = [
     {
@@ -154,13 +180,14 @@ const SolarSystem = ({ setSelectedPlanet }) => {
       orbitDetails: 'Venus orbits the Sun every 225 Earth days.',
     },
     {
-      obj: earth,
+      obj: earthObj,
       speed: 0.2,
       distance: 2.0 * 2,
       name: 'Earth',
       info: 'Earth is our home planet.',
       composition: 'Earth has a diverse composition with oceans, continents, and an atmosphere.',
       orbitDetails: 'Earth orbits the Sun every 365.25 days.',
+      ref: earthRef,
     },
     {
       obj: mars,
@@ -207,6 +234,19 @@ const SolarSystem = ({ setSelectedPlanet }) => {
       composition: 'Neptune is an ice giant with a composition similar to Uranus.',
       orbitDetails: 'Neptune takes about 165 Earth years to orbit the Sun.',
     },
+    // Add the moon as a planet with isMoon set to true
+    {
+      obj: moonObj,
+      speed: 1.0, // Speed of the moon's orbit around Earth
+      distance: 0.5, // Distance from Earth
+      name: 'Moon',
+      info: 'The Moon is Earth’s only natural satellite.',
+      composition: 'The Moon is a rocky body covered with craters.',
+      orbitDetails: 'The Moon orbits Earth every 27.3 days.',
+      isMoon: true,
+      parentRef: earthRef, // Reference to Earth
+      ref: moonRef,
+    },
   ];
 
   // Animate asteroid belt
@@ -224,6 +264,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
           planet={planet}
           sunPosition={sunPosition}
           setSelectedPlanet={setSelectedPlanet}
+          ref={planet.ref}
         />
       ))}
       <primitive object={asteroidBelt} />
@@ -340,7 +381,9 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
       }
 
       // Compute a vector perpendicular to sunToPlanet
-      const offsetDirection = new THREE.Vector3().crossVectors(sunToPlanet, upVector).normalize();
+      const offsetDirection = new THREE.Vector3()
+        .crossVectors(sunToPlanet, upVector)
+        .normalize();
 
       // Desired camera offset distance from the planet (closer zoom)
       const offsetDistance = 1.0; // Adjusted for closer zoom
@@ -403,7 +446,9 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
       if (Math.abs(sunToPlanet.dot(upVector)) === 1) {
         upVector = new THREE.Vector3(1, 0, 0);
       }
-      const offsetDirection = new THREE.Vector3().crossVectors(sunToPlanet, upVector).normalize();
+      const offsetDirection = new THREE.Vector3()
+        .crossVectors(sunToPlanet, upVector)
+        .normalize();
       const offsetDistance = 1.0; // Same as before
       const startPosition = startPlanetPosition
         .clone()
@@ -413,7 +458,11 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
       startPosition.y += 0.5; // Same as before
       startPosition.x += 0.5; // Same as before
 
-      camera.position.lerpVectors(startPosition, zoomOutCameraPosition.current, zoomProgress.current);
+      camera.position.lerpVectors(
+        startPosition,
+        zoomOutCameraPosition.current,
+        zoomProgress.current
+      );
 
       controlsRef.current.target.lerpVectors(
         startPlanetPosition,
