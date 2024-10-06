@@ -3,15 +3,18 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Import GLTFLoader
 import getSun from '../solar-system/getSun';
 import getNebula from '../solar-system/getNebula';
 import getStarfield from '../solar-system/getStarfield';
 import getPlanet from '../solar-system/getPlanet';
 import getAsteroidBelt from '../solar-system/getAsteroidBelt';
 import getElipticLines from '../solar-system/getElipticLines';
+import getRocket from '../solar-system/getRocket';
 
 const SolarSystem = () => {
   const [objs, setObjs] = useState([]);
+  const [rocket, setRocket] = useState(null); // State to hold the rocket model
   const solarSystemRef = useRef();
   
   const planetRefs = useRef({
@@ -24,19 +27,25 @@ const SolarSystem = () => {
 
   useEffect(() => {
     const manager = new THREE.LoadingManager();
-    const loader = new OBJLoader(manager);
+    const objLoader = new OBJLoader(manager);
+    const gltfLoader = new GLTFLoader(manager); // Create GLTFLoader instance
     const loadedObjs = [];
 
     const objNames = ['Rock1', 'Rock2', 'Rock3'];
     objNames.forEach((name) => {
       let path = `./rocks/${name}.obj`;
-      loader.load(path, (obj) => {
+      objLoader.load(path, (obj) => {
         obj.traverse((child) => {
           if (child.isMesh) {
             loadedObjs.push(child);
           }
         });
       });
+    });
+
+    // Load the rocket model
+    gltfLoader.load('../assets/Rocket/saturn_v_-_nasa/scene.gltf', (gltf) => {
+      setRocket(gltf.scene);  
     });
 
     manager.onLoad = () => {
@@ -61,7 +70,7 @@ const SolarSystem = () => {
     { ref: planetRefs.current.jupiter, obj: jupiter, speed: 0.1, distance: 2.75 },
   ];
 
-  // Animate planets in their orbits using `useFrame`
+  // Animate planets in their orbits using useFrame
   useFrame(({ clock }) => {
     const elapsed = clock.getElapsedTime();
     
@@ -84,6 +93,7 @@ const SolarSystem = () => {
       <primitive object={getStarfield({ numStars: 500, size: 0.35 })} />
       <primitive object={getNebula({ hue: 0.6, numSprites: 10, opacity: 0.2, radius: 40, size: 80, z: -50.5 })} />
       <primitive object={getNebula({ hue: 0.0, numSprites: 10, opacity: 0.2, radius: 40, size: 80, z: 50.5 })} />
+      {rocket && <primitive object={rocket} />} {/* Add the rocket to the scene */}
     </group>
   );
 };
