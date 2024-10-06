@@ -1,14 +1,27 @@
+// Import necessary libraries and components
 import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+
+// Import your custom functions or components here
+// Ensure these imports are correct based on your project structure
 import getSun from '../solar-system/getSun';
 import getNebula from '../solar-system/getNebula';
 import getStarfield from '../solar-system/getStarfield';
 import getPlanet from '../solar-system/getPlanet';
 import getAsteroidBelt from '../solar-system/getAsteroidBelt';
 import getElipticLines from '../solar-system/getElipticLines';
+
+// Custom hook to get the previous value of a state
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
 
 const Planet = ({ planet, sunPosition, setSelectedPlanet }) => {
   const { obj, name, info, speed, distance } = planet;
@@ -18,10 +31,10 @@ const Planet = ({ planet, sunPosition, setSelectedPlanet }) => {
     if (ref.current) {
       const elapsed = clock.getElapsedTime();
       const x = sunPosition.x + Math.cos(elapsed * speed) * distance;
-      const y = sunPosition.y + Math.sin(elapsed * speed) * distance;
+      const z = sunPosition.z + Math.sin(elapsed * speed) * distance;
       ref.current.position.x = x;
-      ref.current.position.y = y;
-      ref.current.position.z = 0;
+      ref.current.position.y = sunPosition.y;
+      ref.current.position.z = z;
     }
   });
 
@@ -42,26 +55,33 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   const [objs, setObjs] = useState([]);
   const solarSystemRef = useRef();
 
-  // Stars
+  // Sun's position
   const sunRef = useRef();
   const sunPosition = new THREE.Vector3(0, 0, 0);
 
-  // Load objects using OBJLoader
+  // Load asteroid objects using OBJLoader
   useEffect(() => {
     const manager = new THREE.LoadingManager();
     const loader = new OBJLoader(manager);
     const loadedObjs = [];
 
-    const objNames = ['Rock1', 'Rock2', 'Rock3'];
+    const objNames = ['Rock1', 'Rock2', 'Rock3']; // Update these names based on your actual OBJ files
     objNames.forEach((name) => {
-      let path = `./rocks/${name}.obj`;
-      loader.load(path, (obj) => {
-        obj.traverse((child) => {
-          if (child.isMesh) {
-            loadedObjs.push(child);
-          }
-        });
-      });
+      let path = `./rocks/${name}.obj`; // Ensure the path is correct
+      loader.load(
+        path,
+        (obj) => {
+          obj.traverse((child) => {
+            if (child.isMesh) {
+              loadedObjs.push(child);
+            }
+          });
+        },
+        undefined,
+        (error) => {
+          console.error(`Error loading ${path}:`, error);
+        }
+      );
     });
 
     manager.onLoad = () => {
@@ -70,15 +90,15 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   }, []);
 
   // Memoize planet objects to prevent re-creation on every render
-  const mercury = useMemo(() => getPlanet({ size: 0.1, distance: 1.25, img: 'mercury.png' }), []);
-  const venus = useMemo(() => getPlanet({ size: 0.2, distance: 1.65, img: 'venus.png' }), []);
-  const moon = useMemo(() => getPlanet({ size: 0.075, distance: 0.4, img: 'moon.png' }), []);
+  const mercury = useMemo(() => getPlanet({ size: 0.1, img: 'mercury.png' }), []);
+  const venus = useMemo(() => getPlanet({ size: 0.2, img: 'venus.png' }), []);
+  const moon = useMemo(() => getPlanet({ size: 0.075, img: 'moon.png' }), []);
   const earth = useMemo(
-    () => getPlanet({ children: [moon], size: 0.225, distance: 2.0, img: 'earth.png' }),
+    () => getPlanet({ children: [moon], size: 0.225, img: 'earth.png' }),
     [moon]
   );
-  const mars = useMemo(() => getPlanet({ size: 0.15, distance: 2.25, img: 'mars.png' }), []);
-  const jupiter = useMemo(() => getPlanet({ size: 0.4, distance: 2.75, img: 'jupiter.png' }), []);
+  const mars = useMemo(() => getPlanet({ size: 0.15, img: 'mars.png' }), []);
+  const jupiter = useMemo(() => getPlanet({ size: 0.4, img: 'jupiter.png' }), []);
 
   // Memoize other objects to prevent re-creation
   const sun = useMemo(() => getSun(), []);
@@ -86,11 +106,27 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   const elipticLines = useMemo(() => getElipticLines(), []);
   const starfield = useMemo(() => getStarfield({ numStars: 500, size: 0.35 }), []);
   const nebula1 = useMemo(
-    () => getNebula({ hue: 0.6, numSprites: 10, opacity: 0.2, radius: 40, size: 80, z: -50.5 }),
+    () =>
+      getNebula({
+        hue: 0.6,
+        numSprites: 10,
+        opacity: 0.2,
+        radius: 40,
+        size: 80,
+        z: -50.5,
+      }),
     []
   );
   const nebula2 = useMemo(
-    () => getNebula({ hue: 0.0, numSprites: 10, opacity: 0.2, radius: 40, size: 80, z: 50.5 }),
+    () =>
+      getNebula({
+        hue: 0.0,
+        numSprites: 10,
+        opacity: 0.2,
+        radius: 40,
+        size: 80,
+        z: 50.5,
+      }),
     []
   );
 
@@ -163,55 +199,145 @@ const SolarSystem = ({ setSelectedPlanet }) => {
 const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => {
   const { camera } = useThree();
 
-  // Store initial camera position and target
-  const initialCameraPosition = useRef(camera.position.clone());
-  const initialTarget = useRef(controlsRef.current ? controlsRef.current.target.clone() : new THREE.Vector3());
+  // Store positions for animations
+  const zoomInOffset = new THREE.Vector3(0, 0.5, 1.5); // Adjust offset to zoom in closer
+  const zoomOutCameraPosition = useRef(camera.position.clone());
+  const zoomOutTarget = useRef(controlsRef.current ? controlsRef.current.target.clone() : new THREE.Vector3());
+
+  // Animation state
+  const [zoomState, setZoomState] = useState('idle'); // 'idle', 'zoomingIn', 'zoomingOut'
+  const zoomProgress = useRef(0);
+  const animationDuration = 1.0; // seconds
+  const clock = useRef(new THREE.Clock());
+
+  const prevSelectedPlanet = usePrevious(selectedPlanet);
 
   // Handle Escape key to reset the camera
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        setSelectedPlanet(null);
+        if (zoomState === 'idle' && selectedPlanet) {
+          setSelectedPlanet(null);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setSelectedPlanet]);
+  }, [selectedPlanet, zoomState, setSelectedPlanet]);
+
+  // Start zoom-in animation when a planet is selected
+  useEffect(() => {
+    if (
+      selectedPlanet &&
+      prevSelectedPlanet !== selectedPlanet &&
+      controlsRef.current &&
+      zoomState === 'idle'
+    ) {
+      // Store the camera position and target before zoom-in
+      zoomOutCameraPosition.current.copy(camera.position);
+      zoomOutTarget.current.copy(controlsRef.current.target);
+
+      // Start zoom-in animation
+      setZoomState('zoomingIn');
+      zoomProgress.current = 0;
+      clock.current.start();
+
+      // Disable controls during animation
+      controlsRef.current.enabled = false;
+    }
+  }, [selectedPlanet, prevSelectedPlanet, zoomState, camera, controlsRef]);
+
+  // Start zoom-out animation when selectedPlanet becomes null
+  useEffect(() => {
+    if (
+      !selectedPlanet &&
+      prevSelectedPlanet &&
+      controlsRef.current &&
+      zoomState === 'idle'
+    ) {
+      // Start zoom-out animation
+      setZoomState('zoomingOut');
+      zoomProgress.current = 0;
+      clock.current.start();
+
+      // Disable controls during animation
+      controlsRef.current.enabled = false;
+    }
+  }, [selectedPlanet, prevSelectedPlanet, zoomState, controlsRef]);
 
   useFrame(() => {
-    if (selectedPlanet && selectedPlanet.ref.current) {
-      // Get the planet's position
+    if (zoomState === 'zoomingIn') {
+      const delta = clock.current.getDelta();
+      zoomProgress.current += delta / animationDuration;
+
+      if (zoomProgress.current >= 1) {
+        zoomProgress.current = 1;
+        setZoomState('idle');
+        // Keep controls disabled while zoomed in
+        if (controlsRef.current) {
+          controlsRef.current.enabled = false;
+        }
+      }
+
+      // Interpolate camera position and target
       const planetPosition = selectedPlanet.ref.current.getWorldPosition(new THREE.Vector3());
+      const desiredPosition = planetPosition.clone().add(zoomInOffset);
 
-      // Calculate desired camera position (closer to the planet)
-      const offset = new THREE.Vector3(0, 0.5, 1.5); // Adjust offset to zoom in closer
-      const desiredPosition = planetPosition.clone().add(offset);
+      camera.position.lerpVectors(
+        zoomOutCameraPosition.current,
+        desiredPosition,
+        zoomProgress.current
+      );
 
-      // Smoothly move camera towards desired position
-      camera.position.lerp(desiredPosition, 0.1);
+      controlsRef.current.target.lerpVectors(
+        zoomOutTarget.current,
+        planetPosition,
+        zoomProgress.current
+      );
 
-      // Make camera look at the planet
       camera.lookAt(planetPosition);
+    } else if (zoomState === 'zoomingOut') {
+      const delta = clock.current.getDelta();
+      zoomProgress.current += delta / animationDuration;
 
-      // Disable controls while following the planet
-      if (controlsRef.current) {
-        controlsRef.current.enabled = false;
+      if (zoomProgress.current >= 1) {
+        zoomProgress.current = 1;
+
+        // Re-enable controls after zoom-out
+        if (controlsRef.current) {
+          controlsRef.current.enabled = true;
+          controlsRef.current.update();
+        }
+
+        setZoomState('idle');
       }
-    } else {
-      // Return camera to initial position
-      // Smoothly move camera back to initial position
-      camera.position.lerp(initialCameraPosition.current, 0.1);
 
-      // Smoothly move controls target back to initial target
-      if (controlsRef.current) {
-        controlsRef.current.target.lerp(initialTarget.current, 0.1);
-        controlsRef.current.update();
-        controlsRef.current.enabled = true;
-      }
+      // Interpolate camera position and target
+      const planetPosition = prevSelectedPlanet.ref.current.getWorldPosition(new THREE.Vector3());
+      const startPosition = planetPosition.clone().add(zoomInOffset);
 
-      // Make camera look at the controls target
-      camera.lookAt(controlsRef.current ? controlsRef.current.target : new THREE.Vector3());
+      camera.position.lerpVectors(
+        startPosition,
+        zoomOutCameraPosition.current,
+        zoomProgress.current
+      );
+
+      controlsRef.current.target.lerpVectors(
+        planetPosition,
+        zoomOutTarget.current,
+        zoomProgress.current
+      );
+
+      camera.lookAt(controlsRef.current.target);
+    } else if (selectedPlanet) {
+      // After zoom-in animation completes, continuously update camera position to follow the planet
+      const planetPosition = selectedPlanet.ref.current.getWorldPosition(new THREE.Vector3());
+      const desiredPosition = planetPosition.clone().add(zoomInOffset);
+
+      camera.position.copy(desiredPosition);
+      controlsRef.current.target.copy(planetPosition);
+      camera.lookAt(planetPosition);
     }
   });
 
@@ -223,8 +349,18 @@ const Scene = () => {
   const controlsRef = useRef();
 
   return (
-    <div style={{ position: 'relative', height: '100vh', width: '100vw', backgroundColor: 'black' }}>
-      <Canvas camera={{ position: [0, 2.5, 4], fov: 75 }} style={{ width: '100%', height: '100%' }}>
+    <div
+      style={{
+        position: 'relative',
+        height: '100vh',
+        width: '100vw',
+        backgroundColor: 'black',
+      }}
+    >
+      <Canvas
+        camera={{ position: [0, 2.5, 4], fov: 75 }}
+        style={{ width: '100%', height: '100%' }}
+      >
         <ambientLight />
         <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
         <OrbitControls
@@ -234,7 +370,7 @@ const Scene = () => {
           rotateSpeed={0.7}
           enableZoom={true}
           enablePan={true}
-          enableRotate={true} // Ensure rotation is enabled
+          enableRotate={true}
         />
         <Suspense fallback={null}>
           <SolarSystem setSelectedPlanet={setSelectedPlanet} />
