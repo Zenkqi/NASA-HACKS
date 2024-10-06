@@ -5,7 +5,7 @@ import '../../App.css'
 function AboutMe() {
     return (
         <div>
-            <h1 className='AboutMe'>About Me</h1>;            
+            <h1 className='About This Project'>About Project</h1>;            
             <> 
                 <Footer/> 
             </>

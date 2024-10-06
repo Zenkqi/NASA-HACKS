@@ -35,7 +35,7 @@ function Navbar() {
             <nav className='navbar'>
                 <div className='navbar-container'>
                     <Link to="/" className='navbar-logo' onClick={closeMobileMenu}>
-                        WooHoo <i className='fab fa-typo3'/>
+                        Orrey <i className='fab fa-typo3'/>
                     </Link>
                     <div className='menu-icon' onClick={handleClick}>
                         <i className={click ? 'fas fa-times' : 'fas fa-bars'}/>
@@ -45,17 +45,6 @@ function Navbar() {
                         <li className='nav-item'>
                             <Link to='/Home' className='nav-links' onClick={closeMobileMenu}>
                                 Home
-                            </Link>
-                        </li>
-
-                        <li className='nav-item'>
-                            <Link to='/AboutMe' className='nav-links' onClick={closeMobileMenu}>
-                                About Me
-                            </Link>
-                        </li>
-                        <li className='nav-item'>
-                            <Link to='/Projects' className='nav-links' onClick={closeMobileMenu}>
-                                Projects
                             </Link>
                         </li>
 
