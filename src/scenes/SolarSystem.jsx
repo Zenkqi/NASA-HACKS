@@ -13,15 +13,18 @@ import getElipticLines from '../solar-system/getElipticLines';
 const SolarSystem = () => {
   const [objs, setObjs] = useState([]);
   const solarSystemRef = useRef();
-  
-  const planetRefs = useRef({
-    mercury: useRef(),
-    venus: useRef(),
-    earth: useRef(),
-    mars: useRef(),
-    jupiter: useRef(),
-  });
 
+  // Refs for planets to animate their orbits
+  const mercuryRef = useRef();
+  const venusRef = useRef();
+  const earthRef = useRef();
+  const marsRef = useRef();
+  const jupiterRef = useRef();
+
+  // Asteroid
+  const asteroidBeltRef = useRef();
+
+  // Load objects using OBJLoader
   useEffect(() => {
     const manager = new THREE.LoadingManager();
     const loader = new OBJLoader(manager);
@@ -44,7 +47,7 @@ const SolarSystem = () => {
     };
   }, []);
 
-  // Define planets as Three.js objects
+  // Define planets as Three.js objects with initial positions around the Sun
   const mercury = getPlanet({ size: 0.1, distance: 1.25, img: 'mercury.png' });
   const venus = getPlanet({ size: 0.2, distance: 1.65, img: 'venus.png' });
   const moon = getPlanet({ size: 0.075, distance: 0.4, img: 'moon.png' });
@@ -52,33 +55,38 @@ const SolarSystem = () => {
   const mars = getPlanet({ size: 0.15, distance: 2.25, img: 'mars.png' });
   const jupiter = getPlanet({ size: 0.4, distance: 2.75, img: 'jupiter.png' });
 
-  // Reference each planet so we can animate it
+  // Define the planets and their orbital properties
   const planets = [
-    { ref: planetRefs.current.mercury, obj: mercury, speed: 0.4, distance: 1.25 },
-    { ref: planetRefs.current.venus, obj: venus, speed: 0.3, distance: 1.65 },
-    { ref: planetRefs.current.earth, obj: earth, speed: 0.2, distance: 2.0 },
-    { ref: planetRefs.current.mars, obj: mars, speed: 0.17, distance: 2.25 },
-    { ref: planetRefs.current.jupiter, obj: jupiter, speed: 0.1, distance: 2.75 },
+    { ref: mercuryRef, obj: mercury, speed: 0.4, distance: 1.25 },
+    { ref: venusRef, obj: venus, speed: 0.3, distance: 1.65 },
+    { ref: earthRef, obj: earth, speed: 0.2, distance: 2.0 },
+    { ref: marsRef, obj: mars, speed: 0.17, distance: 2.25 },
+    { ref: jupiterRef, obj: jupiter, speed: 0.1, distance: 2.75 },
   ];
 
   // Animate planets in their orbits using `useFrame`
   useFrame(({ clock }) => {
     const elapsed = clock.getElapsedTime();
-    
+
     planets.forEach(({ ref, speed, distance }) => {
       if (ref.current) {
-        ref.current.position.x = Math.cos(elapsed * speed) * distance;
-        ref.current.position.z = Math.sin(elapsed * speed) * distance;
+        // Correct positioning: keep distance from origin and rotate around it
+        ref.current.position.x = Math.cos(elapsed * speed) * distance; // X-axis movement
+        ref.current.position.z = Math.sin(elapsed * speed) * distance; // Z-axis movement
+        ref.current.position.y = 0; // Maintain Y position to avoid vertical movement
+      }
+      if (asteroidBeltRef.current) {
+        asteroidBeltRef.current.rotation.y += 0.0001; // Adjust the speed as needed
       }
     });
   });
-
+removeEventListener
   return (
     <group ref={solarSystemRef}>
       {planets.map(({ ref, obj }, index) => (
         <primitive key={index} object={obj} ref={ref} />
       ))}
-      <primitive object={getAsteroidBelt(objs)} />
+      <primitive object={getAsteroidBelt(objs)} ref={asteroidBeltRef} />
       <primitive object={getElipticLines()} />
       <primitive object={getSun()} />
       <primitive object={getStarfield({ numStars: 500, size: 0.35 })} />
