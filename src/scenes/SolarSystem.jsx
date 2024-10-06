@@ -19,7 +19,7 @@ function usePrevious(value) {
   const ref = useRef();
   useEffect(() => {
     ref.current = value;
-  });
+  }, [value]);
   return ref.current;
 }
 
@@ -202,10 +202,12 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
   // Store positions for animations
   const zoomInOffset = new THREE.Vector3(0, 0.5, 1.5); // Adjust offset to zoom in closer
   const zoomOutCameraPosition = useRef(camera.position.clone());
-  const zoomOutTarget = useRef(controlsRef.current ? controlsRef.current.target.clone() : new THREE.Vector3());
+  const zoomOutTarget = useRef(
+    controlsRef.current ? controlsRef.current.target.clone() : new THREE.Vector3()
+  );
 
   // Animation state
-  const [zoomState, setZoomState] = useState('idle'); // 'idle', 'zoomingIn', 'zoomingOut'
+  const [zoomState, setZoomState] = useState('idle'); // 'idle', 'zoomingIn', 'following', 'zoomingOut'
   const zoomProgress = useRef(0);
   const animationDuration = 1.0; // seconds
   const clock = useRef(new THREE.Clock());
@@ -216,7 +218,7 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        if (zoomState === 'idle' && selectedPlanet) {
+        if ((zoomState === 'following' || zoomState === 'idle') && selectedPlanet) {
           setSelectedPlanet(null);
         }
       }
@@ -254,7 +256,7 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
       !selectedPlanet &&
       prevSelectedPlanet &&
       controlsRef.current &&
-      zoomState === 'idle'
+      (zoomState === 'following' || zoomState === 'idle')
     ) {
       // Start zoom-out animation
       setZoomState('zoomingOut');
@@ -267,13 +269,14 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
   }, [selectedPlanet, prevSelectedPlanet, zoomState, controlsRef]);
 
   useFrame(() => {
+    const delta = clock.current.getDelta();
+
     if (zoomState === 'zoomingIn') {
-      const delta = clock.current.getDelta();
       zoomProgress.current += delta / animationDuration;
 
       if (zoomProgress.current >= 1) {
         zoomProgress.current = 1;
-        setZoomState('idle');
+        setZoomState('following');
         // Keep controls disabled while zoomed in
         if (controlsRef.current) {
           controlsRef.current.enabled = false;
@@ -298,24 +301,25 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
 
       camera.lookAt(planetPosition);
     } else if (zoomState === 'zoomingOut') {
-      const delta = clock.current.getDelta();
       zoomProgress.current += delta / animationDuration;
 
       if (zoomProgress.current >= 1) {
         zoomProgress.current = 1;
+        setZoomState('idle');
 
         // Re-enable controls after zoom-out
         if (controlsRef.current) {
           controlsRef.current.enabled = true;
           controlsRef.current.update();
         }
-
-        setZoomState('idle');
       }
 
       // Interpolate camera position and target
-      const planetPosition = prevSelectedPlanet.ref.current.getWorldPosition(new THREE.Vector3());
-      const startPosition = planetPosition.clone().add(zoomInOffset);
+      const startPlanetPosition = prevSelectedPlanet
+        ? prevSelectedPlanet.ref.current.getWorldPosition(new THREE.Vector3())
+        : new THREE.Vector3();
+
+      const startPosition = startPlanetPosition.clone().add(zoomInOffset);
 
       camera.position.lerpVectors(
         startPosition,
@@ -324,13 +328,13 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
       );
 
       controlsRef.current.target.lerpVectors(
-        planetPosition,
+        startPlanetPosition,
         zoomOutTarget.current,
         zoomProgress.current
       );
 
       camera.lookAt(controlsRef.current.target);
-    } else if (selectedPlanet) {
+    } else if (zoomState === 'following' && selectedPlanet) {
       // After zoom-in animation completes, continuously update camera position to follow the planet
       const planetPosition = selectedPlanet.ref.current.getWorldPosition(new THREE.Vector3());
       const desiredPosition = planetPosition.clone().add(zoomInOffset);
