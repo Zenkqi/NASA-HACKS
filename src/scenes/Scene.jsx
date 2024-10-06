@@ -19,7 +19,7 @@ const Scene = () => {
         backgroundColor: 'black',
       }}
     >
-<SideBar/>
+      <SideBar/>
 
       <Canvas
         camera={{ position: [0, 2.5, 4], fov: 75 }}
