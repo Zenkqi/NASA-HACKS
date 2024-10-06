@@ -19,7 +19,6 @@ const InfoBox = ({ selectedObject, setSelectedObject }) => {
           ×
         </button>
         <h2>{selectedObject.name}</h2>
-
         {/* Tabs */}
         <div className="tabs">
           <button

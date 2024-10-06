@@ -3,7 +3,7 @@
     top: 50%;
     left: 80%;
     transform: translate(-50%, -50%) scale(1);
-    background-color: #ac7382;
+    background-color: #d39cab;
     padding: 20px;
     border-radius: 15px;
     width: 320px;
@@ -64,7 +64,7 @@
     padding: 15px;
     overflow-y: auto;
     flex: 1;
-    background-color: #daa1b1;
+    background-color: #bb8d9a; 
     border-radius: 10px;
   }
   
