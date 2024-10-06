@@ -1,5 +1,5 @@
 import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
@@ -26,7 +26,13 @@ const Planet = ({ planet, sunPosition, setSelectedPlanet }) => {
   });
 
   return (
-    <group ref={ref} onClick={() => setSelectedPlanet({ name, info })} cursor="pointer">
+    <group
+      ref={ref}
+      onClick={() => {
+        setSelectedPlanet({ name, info, ref });
+      }}
+      cursor="pointer"
+    >
       <primitive object={obj} />
     </group>
   );
@@ -130,7 +136,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   // Animate asteroid belt
   useFrame(() => {
     if (asteroidBelt) {
-      asteroidBelt.rotation.y += 0.0001; // Adjust the speed as needed
+      asteroidBelt.rotation.y += 0.001; // Adjust the speed as needed
     }
   });
 
@@ -154,28 +160,100 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   );
 };
 
+const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => {
+  const { camera } = useThree();
+
+  // Store initial camera position and target
+  const initialCameraPosition = useRef(camera.position.clone());
+  const initialTarget = useRef(controlsRef.current ? controlsRef.current.target.clone() : new THREE.Vector3());
+
+  // Handle Escape key to reset the camera
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setSelectedPlanet(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setSelectedPlanet]);
+
+  useFrame(() => {
+    if (selectedPlanet && selectedPlanet.ref.current) {
+      // Get the planet's position
+      const planetPosition = selectedPlanet.ref.current.getWorldPosition(new THREE.Vector3());
+
+      // Calculate desired camera position (closer to the planet)
+      const offset = new THREE.Vector3(0, 0.5, 1.5); // Adjust offset to zoom in closer
+      const desiredPosition = planetPosition.clone().add(offset);
+
+      // Smoothly move camera towards desired position
+      camera.position.lerp(desiredPosition, 0.1);
+
+      // Make camera look at the planet
+      camera.lookAt(planetPosition);
+
+      // Disable controls while following the planet
+      if (controlsRef.current) {
+        controlsRef.current.enabled = false;
+      }
+    } else {
+      // Return camera to initial position
+      // Smoothly move camera back to initial position
+      camera.position.lerp(initialCameraPosition.current, 0.1);
+
+      // Smoothly move controls target back to initial target
+      if (controlsRef.current) {
+        controlsRef.current.target.lerp(initialTarget.current, 0.1);
+        controlsRef.current.update();
+        controlsRef.current.enabled = true;
+      }
+
+      // Make camera look at the controls target
+      camera.lookAt(controlsRef.current ? controlsRef.current.target : new THREE.Vector3());
+    }
+  });
+
+  return null;
+};
+
 const Scene = () => {
   const [selectedPlanet, setSelectedPlanet] = useState(null);
+  const controlsRef = useRef();
 
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100vw', backgroundColor: 'black' }}>
       <Canvas camera={{ position: [0, 2.5, 4], fov: 75 }} style={{ width: '100%', height: '100%' }}>
         <ambientLight />
         <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
-        <OrbitControls enableDamping dampingFactor={0.1} rotateSpeed={0.7} enableZoom={true} enablePan={true} />
+        <OrbitControls
+          ref={controlsRef}
+          enableDamping
+          dampingFactor={0.1}
+          rotateSpeed={0.7}
+          enableZoom={true}
+          enablePan={true}
+          enableRotate={true} // Ensure rotation is enabled
+        />
         <Suspense fallback={null}>
-          {/* Pass setSelectedPlanet to SolarSystem */}
           <SolarSystem setSelectedPlanet={setSelectedPlanet} />
         </Suspense>
+        <CameraAnimation
+          selectedPlanet={selectedPlanet}
+          setSelectedPlanet={setSelectedPlanet}
+          controlsRef={controlsRef}
+        />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
-      {/* Render dropdown menu when a planet is selected */}
+      {/* Render infobox in the center of the screen when a planet is selected */}
       {selectedPlanet && (
         <div
           style={{
             position: 'absolute',
-            top: '10px',
-            left: '10px',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
             backgroundColor: 'rgba(255,255,255,0.8)',
             padding: '10px',
             borderRadius: '5px',
@@ -189,7 +267,13 @@ const Scene = () => {
             <option value="orbit">Orbit Details</option>
             {/* Add more options as needed */}
           </select>
-          <button onClick={() => setSelectedPlanet(null)}>Close</button>
+          <button
+            onClick={() => {
+              setSelectedPlanet(null);
+            }}
+          >
+            Close
+          </button>
         </div>
       )}
     </div>
