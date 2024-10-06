@@ -11,7 +11,6 @@ import getNebula from '../solar-system/getNebula';
 import getStarfield from '../solar-system/getStarfield';
 import getPlanet from '../solar-system/getPlanet';
 import getAsteroidBelt from '../solar-system/getAsteroidBelt';
-import getElipticLines from '../solar-system/getElipticLines';
 
 import Planet from './Planet';
 
@@ -67,7 +66,7 @@ const SolarSystem = ({ setSelectedObject }) => {
   // Memoize other objects to prevent re-creation
   const sun = useMemo(() => getSun(), []);
   const asteroidBelt = useMemo(() => getAsteroidBelt(objs), [objs]);
-  const elipticLines = useMemo(() => getElipticLines(), []);
+  // const elipticLines = useMemo(() => getElipticLines(), []);
   const starfield = useMemo(() => getStarfield({ numStars: 500, size: 0.35 }), []);
   const nebula1 = useMemo(
     () =>
@@ -103,7 +102,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: mercury,
       speed: 0.4,
-      distance: 1.25 * 2,
+      distanceX: 1.25 * 2,
+      distanceZ: 1.25 * 3,
       name: 'Mercury',
       info: 'Mercury is the closest planet to the Sun.',
       composition: 'Mercury is a rocky planet with a solid, cratered surface.',
@@ -112,7 +112,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: venus,
       speed: 0.3,
-      distance: 1.65 * 2,
+      distanceX: 1.65 * 2,
+      distanceZ: 1.65 * 3,
       name: 'Venus',
       info: 'Venus is the second planet from the Sun.',
       composition: 'Venus has a thick atmosphere composed mainly of carbon dioxide.',
@@ -121,7 +122,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: earthObj,
       speed: 0.2,
-      distance: 2.0 * 2,
+      distanceX: 2.0 * 2,
+      distanceZ: 2.0 * 3,
       name: 'Earth',
       info: 'Earth is our home planet.',
       composition: 'Earth has a diverse composition with oceans, continents, and an atmosphere.',
@@ -131,7 +133,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: mars,
       speed: 0.17,
-      distance: 2.25 * 2,
+      distanceX: 2.25 * 2,
+      distanceZ: 2.25 * 3,
       name: 'Mars',
       info: 'Mars is the fourth planet from the Sun.',
       composition: 'Mars is known as the Red Planet due to its iron oxide-rich surface.',
@@ -140,7 +143,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: jupiter,
       speed: 0.1,
-      distance: 2.75 * 2,
+      distanceX: 2.75 * 2,
+      distanceZ: 2.75 * 3,
       name: 'Jupiter',
       info: 'Jupiter is the largest planet in the Solar System.',
       composition: 'Jupiter is a gas giant composed mainly of hydrogen and helium.',
@@ -149,7 +153,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: saturn,
       speed: 0.083,
-      distance: 3.25 * 2,
+      distanceX: 3.25 * 2,
+      distanceZ: 3.25 * 3,
       name: 'Saturn',
       info: 'Saturn is known for its prominent ring system.',
       composition: 'Saturn is a gas giant composed mainly of hydrogen and helium.',
@@ -158,7 +163,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: uranus,
       speed: 0.047,
-      distance: 3.75 * 2,
+      distanceX: 3.75 * 2,
+      distanceZ: 3.75 * 3,
       name: 'Uranus',
       info: 'Uranus is an ice giant with a unique tilt.',
       composition: 'Uranus has an atmosphere of hydrogen, helium, and methane.',
@@ -167,7 +173,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: neptune,
       speed: 0.038,
-      distance: 4.25 * 2,
+      distanceX: 4.25 * 2,
+      distanceZ: 4.25 * 3,
       name: 'Neptune',
       info: 'Neptune is the farthest known planet from the Sun in the Solar System.',
       composition: 'Neptune is an ice giant with a composition similar to Uranus.',
@@ -177,7 +184,8 @@ const SolarSystem = ({ setSelectedObject }) => {
     {
       obj: moonObj,
       speed: 1.0, // Speed of the moon's orbit around Earth
-      distance: 0.5, // Distance from Earth
+      distanceX: 0.5, // Distance from Earth
+      distanceZ: 0.6,
       name: 'Moon',
       info: 'The Moon is Earth’s only natural satellite.',
       composition: 'The Moon is a rocky body covered with craters.',
@@ -207,7 +215,6 @@ const SolarSystem = ({ setSelectedObject }) => {
         />
       ))}
       <primitive object={asteroidBelt} />
-      <primitive object={elipticLines} />
       <primitive object={sun} ref={sunRef} />
       <primitive object={starfield} />
       <primitive object={nebula1} />
