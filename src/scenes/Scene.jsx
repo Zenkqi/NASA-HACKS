@@ -34,6 +34,7 @@ const Scene = () => {
       </div>
 
 
+
       <Canvas
         camera={{ position: [0, 2.5, 4], fov: 75 }}
         style={{ width: '100%', height: '100%' }}
