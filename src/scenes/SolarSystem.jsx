@@ -4,8 +4,11 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-
+import { useGLTF } from '@react-three/drei';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // Import your custom functions or components here
+// Ensure these imports are correct based on your project structure
+// import getRocket from '../solar-system/getRocket';
 import getSun from '../solar-system/getSun';
 import getNebula from '../solar-system/getNebula';
 import getStarfield from '../solar-system/getStarfield';
@@ -14,6 +17,16 @@ import getAsteroidBelt from '../solar-system/getAsteroidBelt';
 
 import Planet from './Planet';
 
+const Rocket = (props) => {
+  const { scene } = useGLTF('/public/saturn_v/scene.gltf');
+  const rocketRef = useRef();
+
+  useFrame(() => {
+    rocketRef.current.rotation.y += 0.01;
+  });
+  return <primitive ref={rocketRef} object={scene} scale={[0,0,0]} position={[0,0,0]} rotation={[0,0,0]} {...props} />;
+};
+
 const SolarSystem = ({ setSelectedObject }) => {
   const [objs, setObjs] = useState([]);
   const solarSystemRef = useRef();
@@ -21,6 +34,8 @@ const SolarSystem = ({ setSelectedObject }) => {
   // Sun's position
   const sunRef = useRef();
   const sunPosition = new THREE.Vector3(0, 0, 0);
+  const rocketRef = useRef();
+  
 
   // Load asteroid objects using OBJLoader
   useEffect(() => {
@@ -46,10 +61,11 @@ const SolarSystem = ({ setSelectedObject }) => {
         }
       );
     });
-
     manager.onLoad = () => {
-      setObjs(loadedObjs);
-    };
+        setObjs(loadedObjs);
+      };
+
+
   }, []);
 
   // Memoize planet objects to prevent re-creation on every render
@@ -195,6 +211,7 @@ const SolarSystem = ({ setSelectedObject }) => {
       parentRef: earthRef, // Reference to Earth
       ref: moonRef,
     },
+
   ];
 
   // Animate asteroid belt
@@ -206,6 +223,7 @@ const SolarSystem = ({ setSelectedObject }) => {
 
   return (
     <group ref={solarSystemRef}>
+      
       {planets.map((planet, index) => (
         <Planet
           key={index}
@@ -220,8 +238,14 @@ const SolarSystem = ({ setSelectedObject }) => {
       <primitive object={starfield} />
       <primitive object={nebula1} />
       <primitive object={nebula2} />
+      <Rocket 
+        scale={[.006,.006,.006]}
+        position={[1,-1,1]} 
+        rotation={[-Math.PI/2,-Math.PI/4,0]}
+      />
     </group>
   );
 };
+
 
 export default SolarSystem;
