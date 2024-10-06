@@ -159,6 +159,7 @@ const SolarSystem = ({ setSelectedObject }) => {
       info: 'Saturn is known for its prominent ring system.',
       composition: 'Saturn is a gas giant composed mainly of hydrogen and helium.',
       orbitDetails: 'Saturn takes about 29 Earth years to orbit the Sun.',
+      ring: true,
     },
     {
       obj: uranus,
