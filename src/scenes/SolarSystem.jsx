@@ -1,18 +1,20 @@
 // Import necessary libraries and components
+import * as THREE from 'three';
 import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Stars } from '@react-three/drei';
-import * as THREE from 'three';
+import { OrbitControls, useGLTF, Stars } from '@react-three/drei';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // Import your custom functions or components here
 // Ensure these imports are correct based on your project structure
+// import getRocket from '../solar-system/getRocket';
 import getSun from '../solar-system/getSun';
 import getNebula from '../solar-system/getNebula';
 import getStarfield from '../solar-system/getStarfield';
 import getPlanet from '../solar-system/getPlanet';
 import getAsteroidBelt from '../solar-system/getAsteroidBelt';
 import getElipticLines from '../solar-system/getElipticLines';
+
 
 // Custom hook to get the previous value of a state
 function usePrevious(value) {
@@ -50,6 +52,15 @@ const Planet = ({ planet, sunPosition, setSelectedPlanet }) => {
     </group>
   );
 };
+const Rocket = (props) => {
+  const { scene } = useGLTF('/public/saturn_v/scene.gltf');
+  const rocketRef = useRef();
+
+  useFrame(() => {
+    rocketRef.current.rotation.y += 0.01;
+  });
+  return <primitive ref={rocketRef} object={scene} scale={[0,0,0]} position={[0,0,0]} rotation={[0,0,0]} {...props} />;
+};
 
 const SolarSystem = ({ setSelectedPlanet }) => {
   const [objs, setObjs] = useState([]);
@@ -58,13 +69,14 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   // Sun's position
   const sunRef = useRef();
   const sunPosition = new THREE.Vector3(0, 0, 0);
+  const rocketRef = useRef();
+  
 
   // Load asteroid objects using OBJLoader
   useEffect(() => {
     const manager = new THREE.LoadingManager();
     const loader = new OBJLoader(manager);
     const loadedObjs = [];
-
     const objNames = ['Rock1', 'Rock2', 'Rock3']; // Update these names based on your actual OBJ files
     objNames.forEach((name) => {
       let path = `./rocks/${name}.obj`; // Ensure the path is correct
@@ -83,20 +95,21 @@ const SolarSystem = ({ setSelectedPlanet }) => {
         }
       );
     });
-
     manager.onLoad = () => {
-      setObjs(loadedObjs);
-    };
+        setObjs(loadedObjs);
+      };
+
+
   }, []);
 
   // Memoize planet objects to prevent re-creation on every render
   const mercury = useMemo(() => getPlanet({ size: 0.1, img: 'mercury.png' }), []);
   const venus = useMemo(() => getPlanet({ size: 0.2, img: 'venus.png' }), []);
   const moon = useMemo(() => getPlanet({ size: 0.075, img: 'moon.png' }), []);
-  const earth = useMemo(
-    () => getPlanet({ children: [moon], size: 0.225, img: 'earth.png' }),
+  const earth = useMemo(() => getPlanet({ children: [moon], size: 0.225, img: 'earth.png' }),
     [moon]
   );
+  
   const mars = useMemo(() => getPlanet({ size: 0.15, img: 'mars.png' }), []);
   const jupiter = useMemo(() => getPlanet({ size: 0.4, img: 'jupiter.png' }), []);
   const saturn = useMemo(() => getPlanet({ size: 0.35, img: 'saturn.png', ring: true }), []);
@@ -207,6 +220,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
       composition: 'Neptune is an ice giant with a composition similar to Uranus.',
       orbitDetails: 'Neptune takes about 165 Earth years to orbit the Sun.',
     },
+
   ];
 
   // Animate asteroid belt
@@ -218,6 +232,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
 
   return (
     <group ref={solarSystemRef}>
+      
       {planets.map((planet, index) => (
         <Planet
           key={index}
@@ -236,6 +251,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   );
 };
 
+
 const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => {
   const { camera } = useThree();
 
@@ -253,6 +269,8 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
   const clock = useRef(new THREE.Clock());
 
   const prevSelectedPlanet = usePrevious(selectedPlanet);
+
+  
 
   // Handle Escape key to reset the camera
   useEffect(() => {
@@ -389,6 +407,8 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
 };
 
 const Scene = () => {
+  
+
   const [selectedPlanet, setSelectedPlanet] = useState(null);
   const [activeTab, setActiveTab] = useState('overview'); // New state for active tab
   const controlsRef = useRef();
@@ -406,6 +426,12 @@ const Scene = () => {
         camera={{ position: [0, 2.5, 4], fov: 75 }}
         style={{ width: '100%', height: '100%' }}
       >
+        
+        <Rocket 
+        scale={[.006,.006,.006]}
+        position={[1,-1,1]} 
+        rotation={[-Math.PI/2,-Math.PI/4,0]}
+        />
         <ambientLight />
         <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
         <OrbitControls
@@ -531,5 +557,4 @@ const Scene = () => {
     </div>
   );
 };
-
 export default Scene;
