@@ -19,7 +19,22 @@ const Scene = () => {
         backgroundColor: 'black',
       }}
     >
-      <SideBar/>
+
+      <div 
+          // Button
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            zIndex: 100,
+            width: '100%', 
+            height: '100%', 
+            //overflow: 'hidden' // Ensure no scrollbars
+          }
+        }
+      >
+        <SideBar />
+      </div>
 
       <Canvas
         camera={{ position: [0, 2.5, 4], fov: 75 }}
