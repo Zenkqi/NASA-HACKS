@@ -10,7 +10,8 @@ const Planet = forwardRef(({ planet, sunPosition, setSelectedObject }, ref) => {
     name,
     info,
     speed,
-    distance,
+    distanceX,
+    distanceZ,
     composition,
     orbitDetails,
     isMoon,
@@ -27,15 +28,17 @@ const Planet = forwardRef(({ planet, sunPosition, setSelectedObject }, ref) => {
       if (isMoon && parentRef && parentRef.current) {
         // Moon orbiting around its parent planet
         const parentPosition = parentRef.current.position;
-        const x = parentPosition.x + Math.cos(elapsed * speed) * distance;
-        const z = parentPosition.z + Math.sin(elapsed * speed) * distance;
+        const x =
+          parentPosition.x + Math.cos(elapsed * speed) * distanceX;
+        const z =
+          parentPosition.z + Math.sin(elapsed * speed) * distanceZ;
         actualRef.current.position.x = x;
         actualRef.current.position.y = parentPosition.y; // Assuming same plane
         actualRef.current.position.z = z;
       } else {
         // Planet orbiting around the sun
-        const x = sunPosition.x + Math.cos(elapsed * speed) * distance;
-        const z = sunPosition.z + Math.sin(elapsed * speed) * distance*2;
+        const x = sunPosition.x + Math.cos(elapsed * speed) * distanceX;
+        const z = sunPosition.z + Math.sin(elapsed * speed) * distanceZ;
         actualRef.current.position.x = x;
         actualRef.current.position.y = sunPosition.y;
         actualRef.current.position.z = z;
@@ -47,7 +50,7 @@ const Planet = forwardRef(({ planet, sunPosition, setSelectedObject }, ref) => {
     <group
       ref={actualRef}
       onClick={(event) => {
-        event.stopPropagation(); // Prevent click event from propagating to parent
+        event.stopPropagation();
         setSelectedObject({ name, info, composition, orbitDetails, ref: actualRef });
       }}
       cursor="pointer"
