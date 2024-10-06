@@ -45,10 +45,11 @@ const SolarSystem = ({ setSelectedObject }) => {
   const sunRef = useRef();
   const sunPosition = new THREE.Vector3(0, 0, 0);
 
-  // filters
-  const [sizeFilter, setSizeFilter] = useState(0);
   const rocketRef = useRef();
   
+
+  // filters
+  const [sizeFilter, setSizeFilter] = useState(0);
 
   // Load asteroid objects using OBJLoader
   useEffect(() => {
@@ -206,7 +207,6 @@ const SolarSystem = ({ setSelectedObject }) => {
       composition: 'Saturn is a gas giant composed mainly of hydrogen and helium.',
       rotationDetails: "One Saturn Day: 10.7 hours",
       orbitDetails: 'Orbit Duration: 10,756 Earth days or 29.4 Earth years.',
-      ring: true,
     },
     {
       obj: uranus,
@@ -273,8 +273,8 @@ const SolarSystem = ({ setSelectedObject }) => {
           sunPosition={sunPosition}
           setSelectedObject={setSelectedObject}
           ref={planet.ref}
-        />) : (<></>)
-      ))}
+        />) : (<></>))
+      )}
       <primitive object={asteroidBelt} />
       <primitive object={sun} ref={sunRef} />
       <primitive object={starfield} />
