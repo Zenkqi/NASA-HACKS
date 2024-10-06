@@ -84,16 +84,9 @@ const SolarSystem = ({ setSelectedObject }) => {
 
   // Memoize planet objects to prevent re-creation on every render
   const mercury = useMemo(() => getPlanet({ size: 0.1, img: 'mercury.png' }), []);
-  const mercury = useMemo(() => getPlanet({ size: 0.1, img: 'mercury.png' }), []);
   const venus = useMemo(() => getPlanet({ size: 0.2, img: 'venus.png' }), []);
   const moonObj = useMemo(() => getPlanet({ size: 0.02, img: 'moon.png' }), []);
-  const moonObj = useMemo(() => getPlanet({ size: 0.02, img: 'moon.png' }), []);
   const earthObj = useMemo(() => getPlanet({ size: 0.2, img: 'earth.png' }), []);
-  const mars = useMemo(() => getPlanet({ size: 0.15, img: 'mars.png' }), []);
-  const jupiter = useMemo(() => getPlanet({ size: 0.45, img: 'jupiter.png' }), []);
-  const saturn = useMemo(() => getPlanet({ size: 0.4, img: 'saturn.png', ring: true }), []);
-  const uranus = useMemo(() => getPlanet({ size: 0.3, img: 'uranus.png' }), []);
-  const neptune = useMemo(() => getPlanet({ size: 0.2, img: 'neptune.png' }), []);
   const mars = useMemo(() => getPlanet({ size: 0.15, img: 'mars.png' }), []);
   const jupiter = useMemo(() => getPlanet({ size: 0.45, img: 'jupiter.png' }), []);
   const saturn = useMemo(() => getPlanet({ size: 0.4, img: 'saturn.png', ring: true }), []);
@@ -219,9 +212,6 @@ const SolarSystem = ({ setSelectedObject }) => {
       obj: uranus,
       speed: 0.047,
       size: 0.3,
-      distanceX: 3.75 * 2,
-      distanceZ: 3.75 * 3,
-      speed: 0.026,
       distanceX: 9 * 2,
       distanceZ: 9 * 3,
       name: 'Uranus',
