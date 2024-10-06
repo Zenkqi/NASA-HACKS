@@ -3,9 +3,11 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/pages/Home.jsx';
+import HomeEarth from './components/pages/HomeEarth.jsx'
 import SignUp from './components/pages/SignUp.jsx';
 import AboutMe from './components/pages/AboutMe.jsx';
 import Projects from './components/pages/Projects.jsx';
+
 
 function App() {
   return (
@@ -13,8 +15,9 @@ function App() {
     <Router>
       <Navbar/>
       <Routes>
-        <Route path='/' exact element={<Home/>}></Route>
-        <Route path='/Home' exact element={<Home/>}></Route>
+        <Route path='/' exact element={<Home />}></Route>
+        <Route path='/Home' exact element={<Home />}></Route>
+        <Route path='/Earth' exact element={<HomeEarth />}></Route>
         <Route path='/AboutMe' exact element={<AboutMe/>}></Route>
         <Route path='/Projects' exact element={<Projects/>}></Route>
         <Route path='/sign-up' exact element={<SignUp/>}></Route>

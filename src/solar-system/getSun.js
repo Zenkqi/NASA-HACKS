@@ -42,11 +42,11 @@ function getCorona() {
     return mesh;
 }
 const texLoader = new THREE.TextureLoader();
-function getSun(path) {
+function getSun(path, isCorona) {
     
     const map = texLoader.load(path);
     const sunMat = new THREE.MeshStandardMaterial({
-        emissive: 0xff0000,
+        emissive: isCorona ? (0xff0000) : (0),
         map,
     });
     const geo = new THREE.IcosahedronGeometry(1, 6);

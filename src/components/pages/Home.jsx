@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '../../App.css';
 import HeroSection from '../HeroSection';
-import Scene from '../../scenes/Scene.jsx';
+import SolarSystemScene from '../../scenes/SolarSystemScene.jsx';
 import Footer from '../Footer';
 import './Home.css';
 
@@ -28,7 +28,7 @@ function Home() {
 
   return (
     <div className='home-container'>
-      <Scene />
+      <SolarSystemScene />
       <HeroSection hide={hideHero} />
       <div className='additional-content'>
         {/* This div ensures the page height is 200vh */}

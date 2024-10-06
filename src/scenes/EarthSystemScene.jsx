@@ -3,11 +3,11 @@
 import React, { Suspense, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
-import SolarSystem from './SolarSystem';
 import CameraAnimation from './CameraAnimation';
 import InfoBox from './InfoBox';
+import EarthSystem from './EarthSystem';
 
-const Scene = () => {
+const EarthSystemScene = () => {
   const [selectedObject, setSelectedObject] = useState(null);
   const controlsRef = useRef();
 
@@ -36,7 +36,7 @@ const Scene = () => {
           enableRotate={true}
         />
         <Suspense fallback={null}>
-          <SolarSystem setSelectedObject={setSelectedObject} />
+          <EarthSystem setSelectedObject={setSelectedObject} />
         </Suspense>
         <CameraAnimation
           selectedObject={selectedObject}
@@ -53,4 +53,4 @@ const Scene = () => {
   );
 };
 
-export default Scene;
+export default EarthSystemScene;
