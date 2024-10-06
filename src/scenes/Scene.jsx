@@ -15,7 +15,7 @@ const Scene = () => {
     <div
       style={{
         position: 'relative',
-        height: '100vh',
+        height: '110vh',
         width: '100vw',
         backgroundColor: 'black',
       }}
