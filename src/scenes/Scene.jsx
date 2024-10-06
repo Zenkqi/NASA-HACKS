@@ -19,8 +19,7 @@ const Scene = () => {
         backgroundColor: 'black',
       }}
     >
-
-      <div 
+            <div 
           // Button
           style={{ 
             position: 'absolute', 
@@ -29,12 +28,13 @@ const Scene = () => {
             zIndex: 100,
             width: '100%', 
             height: '100%', 
-            //overflow: 'hidden' // Ensure no scrollbars
+            overflow: 'hidden' // Ensure no scrollbars
           }
         }
       >
         <SideBar />
       </div>
+
 
       <Canvas
         camera={{ position: [0, 2.5, 4], fov: 75 }}
@@ -63,7 +63,7 @@ const Scene = () => {
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
       
-
+      
       {/* Infobox */}
       {selectedObject && (
         <InfoBox selectedObject={selectedObject} setSelectedObject={setSelectedObject} />
