@@ -5,14 +5,12 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { useGLTF } from '@react-three/drei';
-=======
 // Import necessary libraries and components
 import * as THREE from 'three';
 import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Stars } from '@react-three/drei';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
->>>>>>> 89cf09d8b995c5c537d76605e5f1234b93dab8a0
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // Import your custom functions or components here
 // Ensure these imports are correct based on your project structure
@@ -24,6 +22,15 @@ import getPlanet from '../solar-system/getPlanet';
 import getAsteroidBelt from '../solar-system/getAsteroidBelt';
 
 import Planet from './Planet';
+
+// Custom hook to get the previous value of a state
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
+}
 
 const Rocket = (props) => {
   const { scene } = useGLTF('/public/saturn_v/scene.gltf');
