@@ -1,0 +1,19 @@
+/* Home.css */
+.home-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; /* Prevent horizontal scroll if necessary */
+  }
+  
+  .additional-content {
+    position: relative;
+    z-index: 1; /* Ensure this content is above the Scene */
+    /* Add padding or margin to prevent content from being hidden behind fixed elements */
+    padding-top: 100vh; /* Example: starts after the viewport height */
+  }
+  
+  .footer {
+    position: relative;
+    z-index: 1;
+  }
