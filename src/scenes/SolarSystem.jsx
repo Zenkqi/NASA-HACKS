@@ -65,7 +65,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     const loader = new OBJLoader(manager);
     const loadedObjs = [];
 
-    const objNames = ['Rock1', 'Rock2', 'Rock3']; // Update these names based on your actual OBJ files
+    const objNames = ['Rock1', 'Rock2', 'Rock3']; // Update these names
     objNames.forEach((name) => {
       let path = `./rocks/${name}.obj`; // Ensure the path is correct
       loader.load(
@@ -138,7 +138,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     {
       obj: mercury,
       speed: 0.4,
-      distance: 1.25,
+      distance: 1.25 * 2,
       name: 'Mercury',
       info: 'Mercury is the closest planet to the Sun.',
       composition: 'Mercury is a rocky planet with a solid, cratered surface.',
@@ -147,7 +147,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     {
       obj: venus,
       speed: 0.3,
-      distance: 1.65,
+      distance: 1.65 * 2,
       name: 'Venus',
       info: 'Venus is the second planet from the Sun.',
       composition: 'Venus has a thick atmosphere composed mainly of carbon dioxide.',
@@ -156,7 +156,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     {
       obj: earth,
       speed: 0.2,
-      distance: 2.0,
+      distance: 2.0 * 2,
       name: 'Earth',
       info: 'Earth is our home planet.',
       composition: 'Earth has a diverse composition with oceans, continents, and an atmosphere.',
@@ -165,7 +165,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     {
       obj: mars,
       speed: 0.17,
-      distance: 2.25,
+      distance: 2.25 * 2,
       name: 'Mars',
       info: 'Mars is the fourth planet from the Sun.',
       composition: 'Mars is known as the Red Planet due to its iron oxide-rich surface.',
@@ -174,7 +174,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     {
       obj: jupiter,
       speed: 0.1,
-      distance: 2.75,
+      distance: 2.75 * 2,
       name: 'Jupiter',
       info: 'Jupiter is the largest planet in the Solar System.',
       composition: 'Jupiter is a gas giant composed mainly of hydrogen and helium.',
@@ -183,7 +183,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     {
       obj: saturn,
       speed: 0.083,
-      distance: 3.25,
+      distance: 3.25 * 2,
       name: 'Saturn',
       info: 'Saturn is known for its prominent ring system.',
       composition: 'Saturn is a gas giant composed mainly of hydrogen and helium.',
@@ -192,7 +192,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     {
       obj: uranus,
       speed: 0.047,
-      distance: 3.75,
+      distance: 3.75 * 2,
       name: 'Uranus',
       info: 'Uranus is an ice giant with a unique tilt.',
       composition: 'Uranus has an atmosphere of hydrogen, helium, and methane.',
@@ -201,7 +201,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
     {
       obj: neptune,
       speed: 0.038,
-      distance: 4.25,
+      distance: 4.25 * 2,
       name: 'Neptune',
       info: 'Neptune is the farthest known planet from the Sun in the Solar System.',
       composition: 'Neptune is an ice giant with a composition similar to Uranus.',
@@ -212,7 +212,7 @@ const SolarSystem = ({ setSelectedPlanet }) => {
   // Animate asteroid belt
   useFrame(() => {
     if (asteroidBelt) {
-      asteroidBelt.rotation.y += 0.001; // Adjust the speed as needed
+      asteroidBelt.rotation.y += 0.001; // Adjust speed as needed
     }
   });
 
@@ -240,7 +240,6 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
   const { camera } = useThree();
 
   // Store positions for animations
-  const zoomInOffset = new THREE.Vector3(0, 0.5, 1.5); // Adjust offset to zoom in closer
   const zoomOutCameraPosition = useRef(camera.position.clone());
   const zoomOutTarget = useRef(
     controlsRef.current ? controlsRef.current.target.clone() : new THREE.Vector3()
@@ -311,33 +310,70 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
   useFrame(() => {
     const delta = clock.current.getDelta();
 
-    if (zoomState === 'zoomingIn') {
-      zoomProgress.current += delta / animationDuration;
+    if (zoomState === 'zoomingIn' || zoomState === 'following') {
+      if (zoomState === 'zoomingIn') {
+        zoomProgress.current += delta / animationDuration;
 
-      if (zoomProgress.current >= 1) {
-        zoomProgress.current = 1;
-        setZoomState('following');
-        // Keep controls disabled while zoomed in
-        if (controlsRef.current) {
-          controlsRef.current.enabled = false;
+        if (zoomProgress.current >= 1) {
+          zoomProgress.current = 1;
+          setZoomState('following');
+          // Keep controls disabled while zoomed in
+          if (controlsRef.current) {
+            controlsRef.current.enabled = false;
+          }
         }
       }
 
-      // Interpolate camera position and target
+      // Compute positions
+      const sunPosition = new THREE.Vector3(0, 0, 0);
       const planetPosition = selectedPlanet.ref.current.getWorldPosition(new THREE.Vector3());
-      const desiredPosition = planetPosition.clone().add(zoomInOffset);
 
-      camera.position.lerpVectors(
-        zoomOutCameraPosition.current,
-        desiredPosition,
-        zoomProgress.current
-      );
+      // Compute vector from sun to planet
+      const sunToPlanet = planetPosition.clone().sub(sunPosition).normalize();
 
-      controlsRef.current.target.lerpVectors(
-        zoomOutTarget.current,
-        planetPosition,
-        zoomProgress.current
-      );
+      // Use the up vector
+      let upVector = new THREE.Vector3(0, 1, 0);
+
+      // If sunToPlanet and upVector are parallel, choose another up vector
+      if (Math.abs(sunToPlanet.dot(upVector)) === 1) {
+        upVector = new THREE.Vector3(1, 0, 0);
+      }
+
+      // Compute a vector perpendicular to sunToPlanet
+      const offsetDirection = new THREE.Vector3().crossVectors(sunToPlanet, upVector).normalize();
+
+      // Desired camera offset distance from the planet (closer zoom)
+      const offsetDistance = 1.0; // Adjusted for closer zoom
+
+      // Compute desired camera position
+      const desiredPosition = planetPosition
+        .clone()
+        .add(offsetDirection.multiplyScalar(offsetDistance));
+
+      // Shift the camera position upward to avoid asteroid belt
+      desiredPosition.y += 0.5; // Adjust the value as needed
+
+      // Shift the camera position to move the planet towards the left of the screen
+      desiredPosition.x += 0.5; // Adjust the value as needed
+
+      // Interpolate camera position and target during zoomingIn
+      if (zoomState === 'zoomingIn') {
+        camera.position.lerpVectors(
+          zoomOutCameraPosition.current,
+          desiredPosition,
+          zoomProgress.current
+        );
+
+        controlsRef.current.target.lerpVectors(
+          zoomOutTarget.current,
+          planetPosition,
+          zoomProgress.current
+        );
+      } else {
+        // In 'following' state, set camera position directly
+        camera.position.copy(desiredPosition);
+        controlsRef.current.target.copy(planetPosition);
+      }
 
       camera.lookAt(planetPosition);
     } else if (zoomState === 'zoomingOut') {
@@ -359,13 +395,25 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
         ? prevSelectedPlanet.ref.current.getWorldPosition(new THREE.Vector3())
         : new THREE.Vector3();
 
-      const startPosition = startPlanetPosition.clone().add(zoomInOffset);
+      // Compute starting camera position
+      const sunPosition = new THREE.Vector3(0, 0, 0);
+      const sunToPlanet = startPlanetPosition.clone().sub(sunPosition).normalize();
 
-      camera.position.lerpVectors(
-        startPosition,
-        zoomOutCameraPosition.current,
-        zoomProgress.current
-      );
+      let upVector = new THREE.Vector3(0, 1, 0);
+      if (Math.abs(sunToPlanet.dot(upVector)) === 1) {
+        upVector = new THREE.Vector3(1, 0, 0);
+      }
+      const offsetDirection = new THREE.Vector3().crossVectors(sunToPlanet, upVector).normalize();
+      const offsetDistance = 1.0; // Same as before
+      const startPosition = startPlanetPosition
+        .clone()
+        .add(offsetDirection.multiplyScalar(offsetDistance));
+
+      // Apply the same upward and horizontal shifts
+      startPosition.y += 0.5; // Same as before
+      startPosition.x += 0.5; // Same as before
+
+      camera.position.lerpVectors(startPosition, zoomOutCameraPosition.current, zoomProgress.current);
 
       controlsRef.current.target.lerpVectors(
         startPlanetPosition,
@@ -374,14 +422,6 @@ const CameraAnimation = ({ selectedPlanet, setSelectedPlanet, controlsRef }) => 
       );
 
       camera.lookAt(controlsRef.current.target);
-    } else if (zoomState === 'following' && selectedPlanet) {
-      // After zoom-in animation completes, continuously update camera position to follow the planet
-      const planetPosition = selectedPlanet.ref.current.getWorldPosition(new THREE.Vector3());
-      const desiredPosition = planetPosition.clone().add(zoomInOffset);
-
-      camera.position.copy(desiredPosition);
-      controlsRef.current.target.copy(planetPosition);
-      camera.lookAt(planetPosition);
     }
   });
 
@@ -428,106 +468,134 @@ const Scene = () => {
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
       {/* Infobox */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '0',
-          right: '0',
-          height: '100%',
-          width: '300px',
-          backgroundColor: 'rgba(255,255,255,0.95)',
-          transform: selectedPlanet ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform 0.5s ease-in-out',
-          boxShadow: '-2px 0 5px rgba(0,0,0,0.3)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {/* Close Button */}
-        <button
-          onClick={() => {
-            setSelectedPlanet(null);
-            setActiveTab('overview'); // Reset active tab
-          }}
+      {selectedPlanet && (
+        <div
           style={{
             position: 'absolute',
-            top: '10px',
-            right: '10px',
-            backgroundColor: 'transparent',
-            color: '#000',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
+            top: '50%',
+            left: '80%', // Moved further right
+            transform: 'translate(-50%, -50%) scale(1)',
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            padding: '20px',
+            borderRadius: '10px',
+            width: '300px',
+            height: '400px',
+            boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            animation: 'popUp 0.5s ease',
+            overflow: 'hidden',
           }}
         >
-          &times;
-        </button>
-        {selectedPlanet && (
-          <>
-            {/* Tabs */}
-            <div style={{ display: 'flex', borderBottom: '1px solid #ccc', marginTop: '50px' }}>
-              <button
-                onClick={() => setActiveTab('overview')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  backgroundColor: activeTab === 'overview' ? '#e0e0e0' : 'transparent',
-                  border: 'none',
-                  borderBottom: activeTab === 'overview' ? '2px solid #000' : 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => setActiveTab('composition')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  backgroundColor: activeTab === 'composition' ? '#e0e0e0' : 'transparent',
-                  border: 'none',
-                  borderBottom: activeTab === 'composition' ? '2px solid #000' : 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Composition
-              </button>
-              <button
-                onClick={() => setActiveTab('orbit')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  backgroundColor: activeTab === 'orbit' ? '#e0e0e0' : 'transparent',
-                  border: 'none',
-                  borderBottom: activeTab === 'orbit' ? '2px solid #000' : 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Orbit Details
-              </button>
-            </div>
-            {/* Content */}
-            <div style={{ padding: '10px', overflowY: 'auto', flex: 1 }}>
-              <h2>{selectedPlanet.name}</h2>
-              {activeTab === 'overview' && (
-                <div>
-                  <p>{selectedPlanet.info}</p>
-                </div>
-              )}
-              {activeTab === 'composition' && (
-                <div>
-                  <p>{selectedPlanet.composition}</p>
-                </div>
-              )}
-              {activeTab === 'orbit' && (
-                <div>
-                  <p>{selectedPlanet.orbitDetails}</p>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
+          {/* Close Button */}
+          <button
+            onClick={() => {
+              setSelectedPlanet(null);
+              setActiveTab('overview'); // Reset active tab
+            }}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              backgroundColor: 'transparent',
+              color: '#000',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+            }}
+          >
+            &times;
+          </button>
+          {/* Tabs */}
+          <div
+            style={{
+              display: 'flex',
+              borderBottom: '1px solid #ccc',
+              marginTop: '40px',
+            }}
+          >
+            <button
+              onClick={() => setActiveTab('overview')}
+              style={{
+                flex: 1,
+                padding: '10px',
+                backgroundColor: activeTab === 'overview' ? '#e0e0e0' : 'transparent',
+                border: 'none',
+                borderBottom: activeTab === 'overview' ? '2px solid #000' : 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab('composition')}
+              style={{
+                flex: 1,
+                padding: '10px',
+                backgroundColor: activeTab === 'composition' ? '#e0e0e0' : 'transparent',
+                border: 'none',
+                borderBottom: activeTab === 'composition' ? '2px solid #000' : 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Composition
+            </button>
+            <button
+              onClick={() => setActiveTab('orbit')}
+              style={{
+                flex: 1,
+                padding: '10px',
+                backgroundColor: activeTab === 'orbit' ? '#e0e0e0' : 'transparent',
+                border: 'none',
+                borderBottom: activeTab === 'orbit' ? '2px solid #000' : 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Orbit Details
+            </button>
+          </div>
+          {/* Content */}
+          <div
+            style={{
+              padding: '10px',
+              overflowY: 'auto',
+              flex: 1,
+            }}
+          >
+            <h2>{selectedPlanet.name}</h2>
+            {activeTab === 'overview' && (
+              <div>
+                <p>{selectedPlanet.info}</p>
+              </div>
+            )}
+            {activeTab === 'composition' && (
+              <div>
+                <p>{selectedPlanet.composition}</p>
+              </div>
+            )}
+            {activeTab === 'orbit' && (
+              <div>
+                <p>{selectedPlanet.orbitDetails}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {/* Keyframe Animation */}
+      <style>
+        {`
+          @keyframes popUp {
+            0% {
+              transform: translate(-50%, -50%) scale(0.5);
+              opacity: 0;
+            }
+            100% {
+              transform: translate(-50%, -50%) scale(1);
+              opacity: 1;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 };
