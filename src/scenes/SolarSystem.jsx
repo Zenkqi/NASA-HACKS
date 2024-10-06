@@ -1,10 +1,5 @@
 // src/components/SolarSystem.jsx
 
-import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import { useGLTF } from '@react-three/drei';
 // Import necessary libraries and components
 import * as THREE from 'three';
 import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react';
