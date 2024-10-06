@@ -1,11 +1,10 @@
-// src/components/Scene.jsx
-
 import React, { Suspense, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import SolarSystem from './SolarSystem';
 import CameraAnimation from './CameraAnimation';
 import InfoBox from './InfoBox';
+import SideBar from './SideBar.jsx';
 
 const Scene = () => {
   const [selectedObject, setSelectedObject] = useState(null);
@@ -20,10 +19,28 @@ const Scene = () => {
         backgroundColor: 'black',
       }}
     >
+
+      <div 
+          // Button
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            zIndex: 100,
+            width: '100%', 
+            height: '100%', 
+            //overflow: 'hidden' // Ensure no scrollbars
+          }
+        }
+      >
+        <SideBar />
+      </div>
+
       <Canvas
         camera={{ position: [0, 2.5, 4], fov: 75 }}
         style={{ width: '100%', height: '100%' }}
       >
+        
         <ambientLight />
         <directionalLight position={[0, 1, 0]} intensity={1} color={0x0099ff} />
         <OrbitControls
@@ -45,6 +62,8 @@ const Scene = () => {
         />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
       </Canvas>
+      
+
       {/* Infobox */}
       {selectedObject && (
         <InfoBox selectedObject={selectedObject} setSelectedObject={setSelectedObject} />

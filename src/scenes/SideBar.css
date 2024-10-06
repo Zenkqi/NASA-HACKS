@@ -1,0 +1,47 @@
+.side-panel {
+    width: 250px;
+    height: 300px; /* Adjust the height */
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 20px; /* Add margin to the left */
+    margin-top: 100px; /* Add margin to the top */
+    transition: transform 0.3s ease-in-out; /* Add transition for animation */
+  }
+  
+  .side-panel:hover {
+    transform: translateY(-10px); /* Move the panel up on hover */
+  }
+  
+  .side-panel-title {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: white;
+    transition: color 0.3s ease-in-out; /* Add transition for animation */
+  }
+  
+  .side-panel-title:hover {
+    color: #aaa; /* Change color on hover */
+  }
+  
+  .side-panel button {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out; /* Add transition for animation */
+  }
+  
+  .side-panel button:hover {
+    background-color: #555;
+    transform: translateY(-5px); /* Move the button up on hover */
+  }
+  
