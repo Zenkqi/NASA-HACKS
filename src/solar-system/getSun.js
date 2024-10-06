@@ -1,17 +1,23 @@
 import * as THREE from 'three';
 import { getFresnelMat } from "./getFresnelMat.js";
-import { ImprovedNoise } from '../../node_modules/three/examples/jsm/math/ImprovedNoise.js';
+import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise.js";
 // sun
 
 function getCorona() {
+    console.log("trying corona");
     const radius = 0.9;
+    console.log(radius);
     const material = new THREE.MeshBasicMaterial({
         color: 0xffff99,
         side: THREE.BackSide,
     });
-    const geo = new THREE.IcosahedronGeometry(radius, 6);
+    console.log(material);
+    const geo = new THREE.IcosahedronGeometry(radius, 12);
+    console.log(geo);
     const mesh = new THREE.Mesh(geo, material);
+    console.log(mesh);
     const noise = new ImprovedNoise();
+    console.log(noise);
 
     let v3 = new THREE.Vector3();
     let p = new THREE.Vector3();
@@ -32,12 +38,16 @@ function getCorona() {
         pos.needsUpdate = true;
     }
     mesh.userData.update = update;
+    console.log(mesh);
     return mesh;
 }
-function getSun() {
+const texLoader = new THREE.TextureLoader();
+function getSun(path) {
     
+    const map = texLoader.load(path);
     const sunMat = new THREE.MeshStandardMaterial({
         emissive: 0xff0000,
+        map,
     });
     const geo = new THREE.IcosahedronGeometry(1, 6);
     const sun = new THREE.Mesh(geo, sunMat);
@@ -48,7 +58,9 @@ function getSun() {
     sun.add(rimMesh);
 
     const coronaMesh = getCorona();
+    console.log(sun.children.toString());
     sun.add(coronaMesh);
+    console.log(sun.children.toString());
 
     const sunLight = new THREE.PointLight(0xffff99, 10);
     sun.add(sunLight);

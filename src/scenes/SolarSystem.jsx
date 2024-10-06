@@ -64,7 +64,7 @@ const SolarSystem = ({ setSelectedObject }) => {
   const neptune = useMemo(() => getPlanet({ size: 0.3, img: 'neptune.png' }), []);
 
   // Memoize other objects to prevent re-creation
-  const sun = useMemo(() => getSun(), []);
+  const sun = useMemo(() => getSun('../../textures/sun.png'), []);
   const asteroidBelt = useMemo(() => getAsteroidBelt(objs), [objs]);
   // const elipticLines = useMemo(() => getElipticLines(), []);
   const starfield = useMemo(() => getStarfield({ numStars: 500, size: 0.35 }), []);
