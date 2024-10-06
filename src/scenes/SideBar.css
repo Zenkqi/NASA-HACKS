@@ -1,70 +1,70 @@
-.button-container {
-    position: relative;
-  }
-  
-  .toggle-button {
-    position: fixed;
-    top: 8px;
-    right: 18px; /* Move the button 18px from the right edge */
-    z-index: 4743647;
-    background: #333; /* Dark grey for button */
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 8px;
-    cursor: pointer;
-  }
-  
-  .side-panel {
-    position: fixed;
-    top: 0;
-    right: 0; /* Keep the panel at the right edge */
-    width: 250px;
-    height: 100%;
-    background: #111; /* Darker background for panel */
-    transition: transform 0.3s ease-in-out;
-    transform: translateX(100%);
-    z-index: 4748347;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .side-panel.open {
-    transform: translateX(0);
-  }
-  
-  .stats-box, .buttons-box {
-    padding: 20px;
-    overflow-y: auto; 
-    scrollbar-width: thin;
-    scrollbar-color: #555 #111; /* Darker grey track and thumb */
-  }
-  
-  /* Webkit browsers (Chrome, Safari) scrollbar styles */
-  .side-panel::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  .side-panel::-webkit-scrollbar-track {
-    background: #111; /* Track color */
-  }
-  
-  .side-panel::-webkit-scrollbar-thumb {
-    background-color: #555; /* Thumb color */
-    border-radius: 4px; /* Rounded corners */
-    border: 2px solid #111; /* Space around the thumb */
-  }
-  
-  button {
-    margin: 8px 0;
-    padding: 8px;
-    background: #e74c3c; /* Red background for buttons */
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background: #c0392b; /* Darker red on hover */
-  }
+/* src/components/SideBar.module.css */
+
+.buttonContainer {
+  position: relative;
+}
+
+.toggleButton {
+  position: fixed;
+  top: 8px;
+  right: 18px;
+  z-index: 1000;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.sidePanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 250px;
+  height: 100%;
+  background: #111;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(100%);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+}
+
+.open {
+  transform: translateX(0);
+}
+
+.statsBox, .buttonsBox {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.buttonsBox button {
+  margin: 8px 0;
+  padding: 8px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.buttonsBox button:hover {
+  background: #c0392b;
+}
+
+/* Scrollbar styles */
+.sidePanel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidePanel::-webkit-scrollbar-track {
+  background: #111;
+}
+
+.sidePanel::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 4px;
+  border: 2px solid #111;
+}
