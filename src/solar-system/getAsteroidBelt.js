@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 function getInstanced({ distance, mesh, size }) {
-    const numObjs = 25 + Math.floor(Math.random() * 25);
+    const numObjs = 120 + Math.floor(Math.random() * 25);
     const instaMesh = new THREE.InstancedMesh(mesh.geometry, mesh.material, numObjs);
     const matrix = new THREE.Matrix4();
     for (let i = 0; i < numObjs; i += 1) {
@@ -28,7 +28,7 @@ function getInstanced({ distance, mesh, size }) {
 function getAsteroidBelt(objs) {
     const group = new THREE.Group();
     objs.forEach((obj) => {
-        const asteroids = getInstanced({ distance: 2.5, mesh: obj, size: 0.035 });
+        const asteroids = getInstanced({ distance: 12.0, mesh: obj, size: 0.035 });
         group.add(asteroids);
     });
     return group;
