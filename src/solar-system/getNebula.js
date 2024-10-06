@@ -1,11 +1,11 @@
 import * as THREE from "three";
-
+ 
 const loader = new THREE.TextureLoader();
 
 function getSprite({ color, opacity, pos, size }) {
   const spriteMat = new THREE.SpriteMaterial({
     color,
-    map: loader.load("./src/rad-grad.png"),
+    map: loader.load("../../textures/rad-grad.png"),
     transparent: true,
     opacity,
   });
